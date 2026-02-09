@@ -49,7 +49,7 @@
 
     <div class="header">
         <h1>Cursive Font Builder</h1>
-        <p>අකුරක් තෝරා Guide Lines අනුව ලියන්න. ලිවීමේ වේගය අනුව පෑනේ තුඩ ස්වභාවිකව හැඩගැසේ.</p>
+        <p>Please write an letter on guidlines</p>
         <button class="btn-zip" onclick="downloadAll()">Download ZIP (SVG)</button>
     </div>
 
@@ -70,12 +70,12 @@
 
         <div class="controls">
             <div class="control-group">
-                <span>පෑනේ මහත:</span>
+                <span>Pen size:</span>
                 <input type="range" id="pen-width" min="1" max="12" value="3" oninput="updatePen()">
                 <b id="pen-val">3</b>
             </div>
             <div class="control-group">
-                <span>පෑන පාට:</span>
+                <span>Pen colour:</span>
                 <input type="color" id="pen-color" value="#000000" oninput="updatePen()">
             </div>
             <button class="btn-save" onclick="saveAndClose()">Save & Back</button>
@@ -171,7 +171,7 @@
                     count++;
                 }
             }
-            if (count === 0) return alert("කරුණාකර අවම වශයෙන් අකුරු කිහිපයක් ලියා ඉන්පසු බාගත කරන්න.");
+            if (count === 0) return alert("Please write at least one letter.");
             
             const content = await zip.generateAsync({type: "blob"});
             saveAs(content, "my_cursive_font_project.zip");
