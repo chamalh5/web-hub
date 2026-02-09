@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <title>Ultimate Vector Font Exporter</title>
+    <script src="https://cdn.jsdelivr.net/npm/opentype.js@1.3.4/dist/opentype.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; margin: 0; padding: 20px; text-align: center; }
+        .control-panel { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); max-width: 900px; margin: 0 auto 30px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 15px; max-width: 1200px; margin: auto; }
+        .box { background: white; border: 2px solid #ddd; border-radius: 10px; padding: 10px; cursor: pointer; transition: 0.3s; }
+        .box:hover { border-color: #007bff; transform: scale(1.05); }
+        .box svg { width: 100%; height: 100px; background: #fff; pointer-events: none; }
+        .label { font-weight: bold; color: #555; display: block; margin-bottom: 5px; }
+
+        #overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; flex-direction: column; align-items: center; justify-content: center; }
+        #canvas-wrapper { position: relative; border: 2px solid #333; width: 85%; height: 60vh; max-width: 800px; background: #fff; }
+        #full-canvas { width: 100%; height: 100%; touch-action: none; position: relative; z-index: 5; }
+        #vector-bg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; opacity: 0.2; }
+
+        .btn-group { margin-top: 25px; display: flex; gap: 10px; justify-content: center; }
+        button { padding: 12px 25px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-upload { background: #6f42c1; color: white; }
+        .btn-zip { background: #007bff; color: white; }
+        .btn-save { background: #28a745; color: white; }
+        input[type="file"] { display: none; }
+        .upload-label { padding: 12px 25px; background: #6f42c1; color: white; border-radius: 8px; cursor: pointer; display: inline-block; }
+    </style>
+</head>
+<body>
+
+    <div class="control-panel">
+        <h1>Vector Font to SVG Exporter</h1>
+        <p>මෙමගින් ෆොන්ට් එකේ ඇති සැබෑ <b>Vector Paths</b> ලබා දෙයි. (No Tracing required)</p>
+        <label class="upload-label" for="fontUpload">Upload Font (.ttf / .otf)</label>
+        <input type="file" id="fontUpload" accept=".ttf, .otf" onchange="handleFontUpload(event)">
+        <div style="margin-top: 20px;">
+            <button class="btn-zip" onclick="downloadZip()">Download All Vector SVGs</button>
+        </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+
+    <div id="overlay">
+        <h2 id="edit-title">Refine Vector</h2>
+        <div id="canvas-wrapper">
+            <div id="vector-bg"></div> <canvas id="full-canvas"></canvas>
+        </div>
+        <div class="btn-group">
+            <button class="btn-save" onclick="saveEdit()">Save Edit</button>
+            <button style="background:#6c757d; color:white;" onclick="fullPad.clear()">Clear Edit</button>
+            <button style="background:#dc3545; color:white;" onclick="closeOverlay()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789".split("");
+        let currentFont = null;
+        const svgDataMap = {};
+        let fullPad, fullCanvas;
+        let currentLetter = '';
+
+        window.onload = () => {
+            fullCanvas = document.getElementById('full-canvas');
+            fullPad = new SignaturePad(fullCanvas, { minWidth: 2, maxWidth: 4 });
+            initGrid();
+        };
+
+        function initGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            chars.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'box';
+                div.id = `box-${c}`;
+                div.onclick = () => openEditor(c);
+                div.innerHTML = `<span class="label">${c}</span><div id="svg-container-${c}"></div>`;
+                grid.appendChild(div);
+            });
+        }
+
+        function handleFontUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    currentFont = opentype.parse(e.target.result);
+                    renderAllChars();
+                } catch (err) { alert("Error parsing font: " + err); }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function renderAllChars() {
+            chars.forEach(c => {
+                // opentype.js මගින් අකුරේ Path එක ලබා ගැනීම
+                const path = currentFont.getPath(c, 0, 80, 72);
+                const svgPath = path.toSVG(2);
+                const svgFinal = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${svgPath}</svg>`;
+                
+                document.getElementById(`svg-container-${c}`).innerHTML = svgFinal;
+                svgDataMap[c] = svgFinal;
+            });
+        }
+
+        function openEditor(c) {
+            if (!currentFont) return alert("පළමුව ෆොන්ට් එකක් ලබා දෙන්න.");
+            currentLetter = c;
+            document.getElementById('overlay').style.display = 'flex';
+            
+            // Background Vector Preview
+            const path = currentFont.getPath(c, 100, 300, 250);
+            document.getElementById('vector-bg').innerHTML = `<svg width="100%" height="100%" viewBox="0 0 800 400">${path.toSVG(2)}</svg>`;
+
+            const ratio = window.devicePixelRatio || 1;
+            fullCanvas.width = fullCanvas.offsetWidth * ratio;
+            fullCanvas.height = fullCanvas.offsetHeight * ratio;
+            fullCanvas.getContext("2d").setTransform(ratio,0,0,ratio,0,0);
+            fullPad.clear();
+        }
+
+        function saveEdit() {
+            if (!fullPad.isEmpty()) {
+                // අලුතින් ඇඳි දේ SVG එකක් ලෙස ගබඩා කරයි
+                svgDataMap[currentLetter] = fullPad.toDataURL("image/svg+xml");
+                document.getElementById(`svg-container-${currentLetter}`).innerHTML = `<img src="${svgDataMap[currentLetter]}" width="100%">`;
+            }
+            closeOverlay();
+        }
+
+        function closeOverlay() { document.getElementById('overlay').style.display = 'none'; }
+
+        async function downloadZip() {
+            const zip = new JSZip();
+            let count = 0;
+            for(let c in svgDataMap) {
+                let content = svgDataMap[c];
+                // Base64 දත්ත නම් එය පිරිසිදු කර ගැනීම
+                if(content.startsWith('data:image/svg+xml;base64,')) {
+                    content = atob(content.split(',')[1]);
+                }
+                zip.file(`${c}.svg`, content);
+                count++;
+            }
+            if(count === 0) return alert("බාගත කිරීමට අකුරු නැත!");
+            saveAs(await zip.generateAsync({type:"blob"}), "vector_fonts.zip");
+        }
+    </script>
+</body>
+</html>

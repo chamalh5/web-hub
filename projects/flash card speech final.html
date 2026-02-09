@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="si">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flashcard App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Noto Sans Sinhala', 'Segoe UI', Arial, sans-serif;
+            background: #1a1a2e;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 15px;
+            background: #16213e;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            color: #0f3460;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .card-container {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            position: relative;
+            touch-action: pan-y;
+        }
+
+        .flashcard {
+            width: 90%;
+            max-width: 500px;
+            height: 400px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2rem;
+            text-align: center;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            position: absolute;
+            user-select: none;
+        }
+
+        .flashcard:active {
+            transform: scale(0.98);
+        }
+
+        .card-content {
+            word-wrap: break-word;
+            max-width: 100%;
+        }
+
+        .controls {
+            padding: 20px;
+            background: #16213e;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .counter {
+            font-size: 1.2rem;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .export-import-section {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #0f3460;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: #16213e;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2 {
+            margin-bottom: 20px;
+            color: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #0f3460;
+            border-radius: 8px;
+            background: #1a1a2e;
+            color: #fff;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .card-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .card-item {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-item-text {
+            flex: 1;
+            word-break: break-word;
+        }
+
+        .btn-delete {
+            background: #e63946;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .btn-edit {
+            background: #4facfe;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-left: 5px;
+        }
+
+        .color-picker {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .color-option.active {
+            border-color: #fff;
+            transform: scale(1.1);
+        }
+
+        .dark-mode-toggle {
+            background: #0f3460;
+        }
+
+        body.light-mode {
+            background: #f0f0f0;
+            color: #000;
+        }
+
+        body.light-mode .header,
+        body.light-mode .controls {
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        body.light-mode .modal-content {
+            background: #fff;
+        }
+
+        body.light-mode .form-group input,
+        body.light-mode .form-group textarea,
+        body.light-mode .form-group select {
+            background: #f0f0f0;
+            color: #000;
+            border-color: #ddd;
+        }
+
+        body.light-mode .card-item {
+            background: #e0e0e0;
+        }
+
+        .swipe-hint {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.5);
+            font-size: 0.9rem;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📚 Flashcard App</h1>
+    </div>
+
+    <div class="card-container" id="cardContainer">
+        <div class="flashcard" id="flashcard">
+            <div class="card-content" id="cardContent">කාඩ් එකක් එකතු කරන්න</div>
+        </div>
+        <div class="swipe-hint">← Swipe කරන්න →</div>
+    </div>
+
+    <div class="controls">
+        <div class="counter" id="counter">0 / 0</div>
+        <button class="btn btn-primary" onclick="openManageModal()">කාඩ් කළමනාකරණය</button>
+        <button class="btn btn-secondary" onclick="openSettingsModal()">සැකසුම්</button>
+        <button class="btn dark-mode-toggle" onclick="toggleDarkMode()">🌙 Mode</button>
+    </div>
+
+    <!-- Manage Cards Modal -->
+    <div class="modal" id="manageModal">
+        <div class="modal-content">
+            <h2>කාඩ් කළමනාකරණය</h2>
+            <div class="form-group">
+                <label id="cardFormLabel">කාඩ් අන්තර්ගතය</label>
+                <textarea id="newCardText" placeholder="ඔබේ පෙළ ඇතුළත් කරන්න..."></textarea>
+            </div>
+            <button class="btn btn-primary" id="cardActionBtn" onclick="addCard()">කාඩ් එක එකතු කරන්න</button>
+            <button class="btn btn-secondary" id="cancelEditBtn" onclick="cancelEdit()" style="display: none; margin-left: 10px;">අවලංගු කරන්න</button>
+            
+            <div class="card-list" id="cardList"></div>
+            
+            <div class="export-import-section">
+                <h3>Export / Import</h3>
+                <div class="button-group">
+                    <button class="btn btn-success" onclick="exportCards()">📥 Export කරන්න</button>
+                    <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">📤 Import කරන්න</button>
+                    <input type="file" id="importFile" accept=".json,.txt" onchange="importCards(event)">
+                </div>
+                <p style="font-size: 0.9rem; color: #aaa; margin-top: 10px;">
+                    Export කළ file එක save කරල ඕනම වෙලාවක import කරන්න පුළුවන්
+                </p>
+            </div>
+            
+            <button class="btn btn-secondary" onclick="closeModal('manageModal')" style="margin-top: 20px;">වසන්න</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal" id="settingsModal">
+        <div class="modal-content">
+            <h2>සැකසුම්</h2>
+            
+            <div class="form-group">
+                <label>අකුරු ප්‍රමාණය</label>
+                <input type="range" id="fontSizeSlider" min="16" max="48" value="32" oninput="updateFontSize(this.value)">
+                <span id="fontSizeValue">32px</span>
+            </div>
+
+            <div class="form-group">
+                <label>පසුබිම් වර්ණය</label>
+                <div class="color-picker">
+                    <div class="color-option active" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" onclick="changeColor('linear-gradient(135deg, #667eea 0%, #764ba2 100%)')"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);" onclick="changeColor('linear-gradient(135deg, #f093fb 0%, #f5576c 100%)')"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);" onclick="changeColor('linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)')"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);" onclick="changeColor('linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)')"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);" onclick="changeColor('linear-gradient(135deg, #fa709a 0%, #fee140 100%)')"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);" onclick="changeColor('linear-gradient(135deg, #30cfd0 0%, #330867 100%)')"></div>
+                </div>
+            </div>
+
+            <button class="btn btn-secondary" onclick="closeModal('settingsModal')" style="margin-top: 20px;">වසන්න</button>
+        </div>
+    </div>
+
+    <script>
+        let cards = [];
+        let currentIndex = 0;
+        let touchStartX = 0;
+        let touchEndX = 0;
+        let isDragging = false;
+        let currentColor = 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+        let editingIndex = -1;
+
+        const flashcard = document.getElementById('flashcard');
+        const cardContent = document.getElementById('cardContent');
+        const counter = document.getElementById('counter');
+
+        // Initialize with sample cards
+        cards = [
+            'හෙලෝ / Hello',
+            'ඔබට කොහොමද? / How are you?',
+            'ස්තූතියි / Thank you',
+            'සුභ පැතුම් / Good wishes'
+        ];
+        updateDisplay();
+
+        // Touch events for swipe
+        flashcard.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+            isDragging = true;
+        });
+
+        flashcard.addEventListener('touchmove', e => {
+            if (!isDragging) return;
+            const currentX = e.changedTouches[0].screenX;
+            const diff = currentX - touchStartX;
+            flashcard.style.transform = `translateX(${diff}px) rotate(${diff * 0.1}deg)`;
+        });
+
+        flashcard.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            isDragging = false;
+            handleSwipe();
+        });
+
+        // Mouse events for desktop
+        flashcard.addEventListener('mousedown', e => {
+            touchStartX = e.screenX;
+            isDragging = true;
+        });
+
+        flashcard.addEventListener('mousemove', e => {
+            if (!isDragging) return;
+            const diff = e.screenX - touchStartX;
+            flashcard.style.transform = `translateX(${diff}px) rotate(${diff * 0.1}deg)`;
+        });
+
+        flashcard.addEventListener('mouseup', e => {
+            touchEndX = e.screenX;
+            isDragging = false;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const diff = touchEndX - touchStartX;
+            
+            if (Math.abs(diff) > 50) {
+                if (diff > 0) {
+                    // Swipe right - previous
+                    currentIndex = currentIndex > 0 ? currentIndex - 1 : cards.length - 1;
+                } else {
+                    // Swipe left - next
+                    currentIndex = currentIndex < cards.length - 1 ? currentIndex + 1 : 0;
+                }
+                updateDisplay();
+            }
+            
+            // Reset position
+            flashcard.style.transform = '';
+        }
+
+        function updateDisplay() {
+            if (cards.length === 0) {
+                cardContent.textContent = 'කාඩ් එකක් එකතු කරන්න';
+                counter.textContent = '0 / 0';
+                return;
+            }
+            
+            cardContent.textContent = cards[currentIndex];
+            counter.textContent = `${currentIndex + 1} / ${cards.length}`;
+            flashcard.style.background = currentColor;
+            updateCardList();
+        }
+
+        function addCard() {
+            const text = document.getElementById('newCardText').value.trim();
+            if (text) {
+                if (editingIndex >= 0) {
+                    // Edit existing card
+                    cards[editingIndex] = text;
+                    editingIndex = -1;
+                    document.getElementById('cardFormLabel').textContent = 'කාඩ් අන්තර්ගතය';
+                    document.getElementById('cardActionBtn').textContent = 'කාඩ් එක එකතු කරන්න';
+                    document.getElementById('cancelEditBtn').style.display = 'none';
+                } else {
+                    // Add new card
+                    cards.push(text);
+                }
+                document.getElementById('newCardText').value = '';
+                updateDisplay();
+            }
+        }
+
+        function editCard(index) {
+            editingIndex = index;
+            document.getElementById('newCardText').value = cards[index];
+            document.getElementById('cardFormLabel').textContent = 'කාඩ් එක සංස්කරණය කරන්න';
+            document.getElementById('cardActionBtn').textContent = 'වෙනස්කම් සුරකින්න';
+            document.getElementById('cancelEditBtn').style.display = 'inline-block';
+            document.getElementById('newCardText').focus();
+        }
+
+        function cancelEdit() {
+            editingIndex = -1;
+            document.getElementById('newCardText').value = '';
+            document.getElementById('cardFormLabel').textContent = 'කාඩ් අන්තර්ගතය';
+            document.getElementById('cardActionBtn').textContent = 'කාඩ් එක එකතු කරන්න';
+            document.getElementById('cancelEditBtn').style.display = 'none';
+        }
+
+        function deleteCard(index) {
+            cards.splice(index, 1);
+            if (currentIndex >= cards.length) {
+                currentIndex = Math.max(0, cards.length - 1);
+            }
+            updateDisplay();
+        }
+
+        function updateCardList() {
+            const cardList = document.getElementById('cardList');
+            cardList.innerHTML = '';
+            
+            cards.forEach((card, index) => {
+                const item = document.createElement('div');
+                item.className = 'card-item';
+                item.innerHTML = `
+                    <div class="card-item-text">${card}</div>
+                    <div>
+                        <button class="btn-edit" onclick="editCard(${index})">සංස්කරණය</button>
+                        <button class="btn-delete" onclick="deleteCard(${index})">මකන්න</button>
+                    </div>
+                `;
+                cardList.appendChild(item);
+            });
+        }
+
+        function openManageModal() {
+            document.getElementById('manageModal').classList.add('active');
+            updateCardList();
+        }
+
+        function openSettingsModal() {
+            document.getElementById('settingsModal').classList.add('active');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+        }
+
+        function updateFontSize(value) {
+            cardContent.style.fontSize = value + 'px';
+            document.getElementById('fontSizeValue').textContent = value + 'px';
+        }
+
+        function changeColor(gradient) {
+            currentColor = gradient;
+            flashcard.style.background = gradient;
+            
+            // Update active color option
+            document.querySelectorAll('.color-option').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('light-mode');
+        }
+
+        function exportCards() {
+            if (cards.length === 0) {
+                alert('Export කරන්න කාඩ් නැහැ!');
+                return;
+            }
+
+            const data = {
+                cards: cards,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(dataBlob);
+            
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `flashcards_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+
+            alert(`✅ ${cards.length} කාඩ් සාර්ථකව export වුණා!`);
+        }
+
+        function importCards(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const content = e.target.result;
+                    let importedData;
+
+                    // Try parsing as JSON
+                    try {
+                        importedData = JSON.parse(content);
+                        
+                        // Check if it's our format
+                        if (importedData.cards && Array.isArray(importedData.cards)) {
+                            cards = importedData.cards;
+                        } else if (Array.isArray(importedData)) {
+                            // Simple array format
+                            cards = importedData;
+                        } else {
+                            throw new Error('Invalid format');
+                        }
+                    } catch (jsonError) {
+                        // Try as plain text (one card per line)
+                        const lines = content.split('\n').filter(line => line.trim());
+                        if (lines.length > 0) {
+                            cards = lines;
+                        } else {
+                            throw new Error('No valid content');
+                        }
+                    }
+
+                    currentIndex = 0;
+                    updateDisplay();
+                    alert(`✅ ${cards.length} කාඩ් සාර්ථකව import වුණා!`);
+                } catch (error) {
+                    alert('❌ File එක import කරන්න බැරි වුණා. වලංගු JSON හෝ text file එකක් තෝරන්න.');
+                    console.error('Import error:', error);
+                }
+            };
+            
+            reader.readAsText(file);
+            event.target.value = ''; // Reset file input
+        }
+
+        // Prevent screen sleep
+        let wakeLock = null;
+
+        async function requestWakeLock() {
+            try {
+                if ('wakeLock' in navigator) {
+                    wakeLock = await navigator.wakeLock.request('screen');
+                }
+            } catch (err) {
+                console.log('Wake Lock error:', err);
+            }
+        }
+
+        requestWakeLock();
+
+        document.addEventListener('visibilitychange', async () => {
+            if (wakeLock !== null && document.visibilityState === 'visible') {
+                await requestWakeLock();
+            }
+        });
+    </script>
+</body>
+</html>

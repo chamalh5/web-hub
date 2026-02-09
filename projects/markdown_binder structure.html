@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Markdown Converter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/4.3.0/marked.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50, #34495e);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            min-height: 600px;
+        }
+        
+        .input-section, .output-section {
+            padding: 30px;
+        }
+        
+        .input-section {
+            border-right: 2px solid #f0f0f0;
+        }
+        
+        .section-title {
+            font-size: 1.3em;
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+        
+        .btn-add {
+            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .parts-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .markdown-part {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            background: white;
+        }
+        
+        .part-header {
+            background: #f8f9fa;
+            padding: 12px 15px;
+            border-bottom: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .part-title {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .part-controls {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .part-btn {
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .btn-remove {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .part-content {
+            padding: 15px;
+        }
+        
+        .part-textarea {
+            width: 100%;
+            min-height: 120px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            resize: vertical;
+        }
+        
+        .part-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        #preview {
+            width: 100%;
+            height: 500px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafafa;
+            font-family: Georgia, serif;
+            line-height: 1.6;
+        }
+        
+        #preview h1 {
+            color: #2c3e50;
+            font-size: 2.2em;
+            margin: 30px 0 20px 0;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        #preview h2 {
+            color: #34495e;
+            font-size: 1.8em;
+            margin: 25px 0 15px 0;
+            border-left: 4px solid #e74c3c;
+            padding-left: 15px;
+        }
+        
+        #preview h3 {
+            color: #2c3e50;
+            font-size: 1.4em;
+            margin: 20px 0 12px 0;
+        }
+        
+        #preview blockquote {
+            border-left: 5px solid #3498db;
+            background: #ecf0f1;
+            padding: 15px 20px;
+            margin: 20px 0;
+            color: #2c3e50;
+            font-style: italic;
+            border-radius: 0 8px 8px 0;
+        }
+        
+        #preview code {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+        }
+        
+        #preview pre {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+        
+        #preview table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        #preview th {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 15px;
+            text-align: left;
+        }
+        
+        #preview td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #ecf0f1;
+        }
+        
+        #preview tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+        
+        .file-upload-area {
+            border: 3px dashed #e0e0e0;
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #fafafa;
+        }
+        
+        .file-upload-area:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+        
+        .file-upload-area.dragover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: scale(1.02);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.2);
+        }
+        
+        .upload-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #667eea;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+            font-style: italic;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .input-section {
+                border-right: none;
+                border-bottom: 2px solid #f0f0f0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📝 Smart Markdown Converter</h1>
+            <p>Create and preview unified markdown documents</p>
+        </div>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <h2 class="section-title">📄 Document Parts</h2>
+                
+                <div class="file-upload-area" id="uploadArea">
+                    <div class="upload-icon">📤</div>
+                    <h3>Drop Markdown Files Here</h3>
+                    <p>Or click to select files</p>
+                    <input type="file" id="fileInput" multiple accept=".md,.txt" style="display: none;" />
+                </div>
+                
+                <div class="controls">
+                    <button class="btn btn-add" onclick="addNewPart()">➕ Add Section</button>
+                    <button class="btn btn-primary" onclick="updatePreview()">👁️ Update Preview</button>
+                    <button class="btn btn-primary" onclick="exportMarkdown()">💾 Export MD</button>
+                </div>
+                
+                <div id="status" class="status"></div>
+                
+                <div class="parts-container" id="partsContainer">
+                    <div class="empty-state">
+                        Click "Add Section" to start creating your document
+                    </div>
+                </div>
+            </div>
+            
+            <div class="output-section">
+                <h2 class="section-title">👀 Live Preview</h2>
+                <div id="preview">
+                    <div class="empty-state">
+                        Preview will appear here
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let documentParts = [];
+        let partCounter = 0;
+
+        function addNewPart() {
+            partCounter++;
+            const part = {
+                id: partCounter,
+                title: `Section ${partCounter}`,
+                content: `# New Section\n\nAdd your markdown content here...\n\n## Subsection\n\nWrite your content with **bold**, *italic*, and \`code\` formatting.\n\n> This is a blockquote\n\n- List item 1\n- List item 2\n- List item 3`
+            };
+            
+            documentParts.push(part);
+            renderParts();
+            updatePreview();
+            showStatus('New section added!', 'success');
+        }
+
+        function renderParts() {
+            const container = document.getElementById('partsContainer');
+            
+            if (documentParts.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        Click "Add Section" to start creating your document
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = documentParts.map((part, index) => `
+                <div class="markdown-part">
+                    <div class="part-header">
+                        <input type="text" value="${part.title}" 
+                               onchange="updatePartTitle(${part.id}, this.value)"
+                               class="part-title"
+                               style="border: none; background: transparent; font-weight: 600; color: #2c3e50;">
+                        <div class="part-controls">
+                            <button class="part-btn btn-remove" onclick="removePart(${part.id})">✕</button>
+                        </div>
+                    </div>
+                    <div class="part-content">
+                        <textarea class="part-textarea" 
+                                  oninput="updatePartContent(${part.id}, this.value)"
+                                  placeholder="Enter markdown content...">${part.content}</textarea>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function updatePartTitle(id, title) {
+            const part = documentParts.find(p => p.id === id);
+            if (part) {
+                part.title = title;
+            }
+        }
+
+        function updatePartContent(id, content) {
+            const part = documentParts.find(p => p.id === id);
+            if (part) {
+                part.content = content;
+                updatePreview();
+            }
+        }
+
+        function removePart(id) {
+            documentParts = documentParts.filter(p => p.id !== id);
+            renderParts();
+            updatePreview();
+            showStatus('Section removed', 'success');
+        }
+
+        function updatePreview() {
+            const preview = document.getElementById('preview');
+            
+            if (documentParts.length === 0) {
+                preview.innerHTML = '<div class="empty-state">Preview will appear here</div>';
+                return;
+            }
+
+            const combinedMarkdown = documentParts
+                .map(part => part.content)
+                .join('\n\n---\n\n');
+
+            try {
+                preview.innerHTML = marked.parse(combinedMarkdown);
+            } catch (error) {
+                preview.innerHTML = `<div class="empty-state">Error rendering markdown: ${error.message}</div>`;
+            }
+        }
+
+        function exportMarkdown() {
+            if (documentParts.length === 0) {
+                showStatus('No content to export', 'error');
+                return;
+            }
+
+            const combinedMarkdown = documentParts
+                .map(part => `<!-- ${part.title} -->\n${part.content}`)
+                .join('\n\n---\n\n');
+
+            const blob = new Blob([combinedMarkdown], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'unified-document.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            showStatus('Markdown exported successfully!', 'success');
+        }
+
+        function showStatus(message, type) {
+            const status = document.getElementById('status');
+            status.textContent = message;
+            status.className = `status ${type}`;
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.style.display = 'none';
+            }, 3000);
+        }
+
+        // Initialize with file upload functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            setupFileUpload();
+            addNewPart();
+        });
+
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+
+            // Click to select files
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // Drag and drop events
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = Array.from(e.dataTransfer.files).filter(file => 
+                    file.name.endsWith('.md') || file.name.endsWith('.txt')
+                );
+                if (files.length > 0) {
+                    handleFiles(files);
+                } else {
+                    showStatus('Please drop only .md or .txt files', 'error');
+                }
+            });
+
+            // File input change
+            fileInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                if (files.length > 0) {
+                    handleFiles(files);
+                }
+                e.target.value = ''; // Reset input
+            });
+        }
+
+        async function handleFiles(files) {
+            showStatus(`Loading ${files.length} file(s)...`, 'success');
+
+            for (const file of files) {
+                try {
+                    const content = await readFileContent(file);
+                    partCounter++;
+                    const part = {
+                        id: partCounter,
+                        title: file.name.replace(/\.(md|txt)$/i, ''),
+                        content: content
+                    };
+                    documentParts.push(part);
+                } catch (error) {
+                    showStatus(`Error reading ${file.name}: ${error.message}`, 'error');
+                }
+            }
+
+            renderParts();
+            updatePreview();
+            showStatus(`Successfully loaded ${files.length} file(s)!`, 'success');
+        }
+
+        function readFileContent(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target.result);
+                reader.onerror = () => reject(new Error('Failed to read file'));
+                reader.readAsText(file);
+            });
+        }
+    </script>
+</body>
+</html>

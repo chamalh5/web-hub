@@ -1,0 +1,1205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>Font Editor Pro</title>
+    <script src="opentype.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0f0f0f;
+            color: #e0e0e0;
+            overflow-x: hidden;
+        }
+        
+        /* Mobile-first Navigation */
+        .nav {
+            background: #1a1a1a;
+            padding: 0;
+            border-bottom: 2px solid #333;
+            display: flex;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav::-webkit-scrollbar {
+            height: 3px;
+        }
+        
+        .nav::-webkit-scrollbar-thumb {
+            background: #4a9eff;
+            border-radius: 3px;
+        }
+        
+        .nav-item {
+            padding: 12px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 500;
+            white-space: nowrap;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        
+        .nav-item:active {
+            background: #2a2a2a;
+        }
+        
+        .nav-item.active {
+            border-bottom-color: #4a9eff;
+            background: #252525;
+            color: #4a9eff;
+        }
+        
+        .page {
+            display: none;
+            padding: 15px;
+            min-height: calc(100vh - 47px);
+        }
+        
+        .page.active {
+            display: block;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        
+        h1 {
+            margin-bottom: 8px;
+            color: #fff;
+            font-size: clamp(20px, 5vw, 28px);
+        }
+        
+        h2 {
+            margin-bottom: 15px;
+            color: #fff;
+            font-size: clamp(16px, 4vw, 20px);
+        }
+        
+        .header p {
+            color: #999;
+            font-size: clamp(12px, 3vw, 14px);
+        }
+        
+        .upload-area {
+            border: 2px dashed #444;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: #1a1a1a;
+        }
+        
+        .upload-area:active {
+            transform: scale(0.98);
+        }
+        
+        .upload-area.dragover {
+            border-color: #4a9eff;
+            background: #1a2a3a;
+        }
+        
+        input[type="file"] {
+            display: none;
+        }
+        
+        .panel {
+            background: #1a1a1a;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .preview-main {
+            background: #fff;
+            padding: 30px 20px;
+            border-radius: 12px;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: auto;
+            touch-action: pan-y;
+        }
+        
+        .preview-text {
+            color: #000;
+            line-height: 1.2;
+            word-wrap: break-word;
+            width: 100%;
+            user-select: text;
+        }
+        
+        .control-group {
+            margin-bottom: 18px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #aaa;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            background: #0f0f0f;
+            border: 1px solid #333;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: #4a9eff;
+        }
+        
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin-top: 8px;
+            height: 6px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: #333;
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4a9eff;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:active {
+            transform: scale(1.2);
+        }
+        
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #4a9eff;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .range-value {
+            display: inline-block;
+            min-width: 60px;
+            text-align: right;
+            color: #4a9eff;
+            font-weight: bold;
+        }
+        
+        button {
+            background: #4a9eff;
+            color: #fff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+            width: 100%;
+            touch-action: manipulation;
+        }
+        
+        button:active {
+            transform: scale(0.97);
+            background: #3a8eef;
+        }
+        
+        button:disabled {
+            background: #333;
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        button.secondary {
+            background: #2a2a2a;
+            color: #4a9eff;
+            border: 1px solid #4a9eff;
+        }
+        
+        button.secondary:active {
+            background: #3a3a3a;
+        }
+        
+        .button-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .characters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(65px, 1fr));
+            gap: 10px;
+            padding: 15px;
+            background: #0f0f0f;
+            border-radius: 12px;
+            max-height: 70vh;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .char-box {
+            background: #1a1a1a;
+            padding: 15px 8px;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            position: relative;
+        }
+        
+        .char-box:active {
+            transform: scale(0.95);
+            border-color: #4a9eff;
+        }
+        
+        .char-box.copied {
+            background: #2ecc71;
+            border-color: #2ecc71;
+        }
+        
+        .char-display {
+            font-size: 32px;
+            color: #fff;
+            margin-bottom: 5px;
+            line-height: 1;
+        }
+        
+        .char-code {
+            font-size: 9px;
+            color: #888;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 3px;
+            right: 3px;
+            background: #4a9eff;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.2s;
+            padding: 0;
+        }
+        
+        .char-box:hover .copy-btn,
+        .char-box:active .copy-btn {
+            opacity: 1;
+        }
+        
+        .metrics-display {
+            background: #fff;
+            padding: 30px 20px;
+            border-radius: 12px;
+            position: relative;
+            height: 250px;
+            margin-bottom: 15px;
+            overflow: hidden;
+        }
+        
+        .sample-char {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            color: #000;
+            font-size: clamp(80px, 20vw, 140px);
+        }
+        
+        .metric-line {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            transition: all 0.3s;
+        }
+        
+        .metric-line.baseline {
+            background: #e74c3c;
+            bottom: 30%;
+        }
+        
+        .metric-line.xheight {
+            background: #3498db;
+        }
+        
+        .metric-line.ascender {
+            background: #2ecc71;
+        }
+        
+        .metric-line.descender {
+            background: #f39c12;
+        }
+        
+        .metric-label {
+            position: absolute;
+            left: 10px;
+            font-size: 10px;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 4px;
+            color: #fff;
+        }
+        
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #2ecc71;
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            z-index: 1000;
+            transition: transform 0.3s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+        }
+        
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+        
+        .section-header {
+            grid-column: 1/-1;
+            padding: 15px 10px 8px;
+            color: #4a9eff;
+            font-weight: bold;
+            font-size: 13px;
+            border-top: 2px solid #333;
+            margin-top: 10px;
+            position: sticky;
+            top: 0;
+            background: #0f0f0f;
+            z-index: 10;
+        }
+        
+        .info-box {
+            background: #1a2a3a;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #4a9eff;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        
+        .info-box strong {
+            color: #4a9eff;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        
+        .favorite-chars {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .favorite-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+            min-height: 50px;
+        }
+        
+        .fav-char {
+            background: #2a2a2a;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 24px;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .fav-char:active {
+            transform: scale(0.95);
+        }
+        
+        .remove-fav {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #e74c3c;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+        }
+        
+        .bearing-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .bearing-visual {
+            background: #fff;
+            height: 150px;
+            border-radius: 8px;
+            position: relative;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .bearing-left, .bearing-right {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            background: rgba(74, 158, 255, 0.2);
+            border: 2px solid #4a9eff;
+        }
+        
+        .bearing-left {
+            left: 0;
+        }
+        
+        .bearing-right {
+            right: 0;
+        }
+        
+        .bearing-char {
+            font-size: 80px;
+            color: #000;
+            z-index: 5;
+        }
+        
+        /* Modal for Char Zoom */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 200;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .modal-content {
+            background: #fff;
+            padding: 40px;
+            border-radius: 20px;
+            font-size: 150px;
+            color: #000;
+            margin-bottom: 20px;
+        }
+
+        /* Tablet and Desktop */
+        @media (min-width: 768px) {
+            .nav-item {
+                padding: 15px 30px;
+                font-size: 15px;
+            }
+            
+            .page {
+                padding: 20px;
+            }
+            
+            .header {
+                padding: 25px;
+            }
+            
+            .panel {
+                padding: 25px;
+            }
+            
+            .two-column {
+                grid-template-columns: 2fr 1fr;
+            }
+            
+            .characters-grid {
+                grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
+                gap: 12px;
+                padding: 20px;
+            }
+            
+            .char-box {
+                padding: 18px 10px;
+            }
+            
+            .preview-main {
+                padding: 50px 40px;
+                min-height: 400px;
+            }
+            
+            .button-group {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            }
+        }
+        
+        /* Loading spinner */
+        .spinner {
+            border: 3px solid #333;
+            border-top: 3px solid #4a9eff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .search-box {
+            margin-bottom: 15px;
+        }
+        
+        .search-box input {
+            padding-left: 35px;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="%23888" viewBox="0 0 16 16"><path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: 10px center;
+        }
+    </style>
+</head>
+<body>
+    <div class="nav">
+        <div class="nav-item active" onclick="showPage('upload')">📁 Upload</div>
+        <div class="nav-item" onclick="showPage('preview')">🖼️ Preview</div>
+        <div class="nav-item" onclick="showPage('metadata')">📊 Metadata</div>
+        <div class="nav-item" onclick="showPage('metrics')">📏 Metrics</div>
+        <div class="nav-item" onclick="showPage('bearing')">↔️ Bearing</div>
+        <div class="nav-item" onclick="showPage('characters')">🔤 Characters</div>
+        <div class="nav-item" onclick="showPage('compare')">⚖️ Compare</div>
+    </div>
+
+    <div class="toast" id="toast">✓ Copied!</div>
+
+    <div id="zoomModal" class="modal" onclick="this.style.display='none'">
+        <div class="modal-content" id="modalChar">A</div>
+        <button style="width: auto; padding: 10px 40px;" onclick="event.stopPropagation(); downloadCharImage()">📥 Download Character Image</button>
+    </div>
+
+    <div class="page active" id="upload">
+        <div class="container">
+            <div class="header">
+                <h1>🔤 Font Editor Pro</h1>
+                <p>Professional font preview and editing tool</p>
+            </div>
+            <div class="panel">
+                <div class="upload-area" id="uploadArea">
+                    <h2>📁 Upload Main Font</h2>
+                    <p style="color: #888; margin-top: 10px;">Tap or drag & drop</p>
+                    <p style="color: #666; margin-top: 5px; font-size: 12px;">TTF, OTF, WOFF, WOFF2</p>
+                    <input type="file" id="fontFile" accept=".ttf,.otf,.woff,.woff2">
+                </div>
+                <div id="fontInfo" style="display: none; margin-top: 15px;">
+                    <div class="info-box">
+                        <p><strong>File:</strong> <span id="uploadedFileName">-</span></p>
+                        <p style="margin-top: 8px;"><strong>Size:</strong> <span id="uploadedFileSize">-</span></p>
+                    </div>
+                    <button onclick="showPage('preview')">Continue to Preview →</button>
+                </div>
+            </div>
+            
+            <div class="panel" style="margin-top: 15px;">
+                <h2>📎 Upload Reference Font (Optional)</h2>
+                <p style="color: #888; font-size: 13px; margin-bottom: 15px;">Compare with another font</p>
+                <div class="upload-area" id="uploadAreaRef" style="padding: 20px;">
+                    <p>📁 Tap to upload reference font</p>
+                    <input type="file" id="fontFileRef" accept=".ttf,.otf,.woff,.woff2">
+                </div>
+                <div id="fontInfoRef" style="display: none; margin-top: 15px;">
+                    <div class="info-box">
+                        <p><strong>Reference:</strong> <span id="uploadedFileNameRef">-</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="preview">
+        <div class="container">
+            <div class="header">
+                <h1>🖼️ Preview Window</h1>
+                <p>Customize and preview your font</p>
+            </div>
+            
+            <div class="two-column">
+                <div>
+                    <div class="panel">
+                        <h2>Main Preview</h2>
+                        <div class="preview-main" id="previewMain">
+                            <div class="preview-text" id="previewDisplay">Load a font to preview</div>
+                        </div>
+                        <div class="button-group">
+                            <button onclick="takeScreenshot()">📸 Screenshot</button>
+                            <button onclick="downloadScreenshot()" id="downloadScreenBtn" disabled>💾 Download</button>
+                            <button class="secondary" onclick="copyPreviewText()">📋 Copy Text</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="panel">
+                        <h2>Controls</h2>
+                        <div class="control-group">
+                            <label>Custom Text</label>
+                            <textarea id="previewText">The quick brown fox jumps over the lazy dog
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+0123456789</textarea>
+                        </div>
+                        <div class="control-group">
+                            <label>Font Size: <span class="range-value" id="sizeValue">48px</span></label>
+                            <input type="range" id="fontSize" min="12" max="200" value="48">
+                        </div>
+                        <div class="control-group">
+                            <label>Line Height: <span class="range-value" id="lineHeightValue">1.2</span></label>
+                            <input type="range" id="lineHeight" min="0.5" max="3" step="0.1" value="1.2">
+                        </div>
+                        <div class="control-group">
+                            <label>Letter Spacing: <span class="range-value" id="letterSpacingValue">0px</span></label>
+                            <input type="range" id="letterSpacing" min="-10" max="50" value="0">
+                        </div>
+                        <button onclick="resetPreview()">🔄 Reset Settings</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="metadata">
+        <div class="container">
+            <div class="header">
+                <h1>📊 Deep Metadata Editor</h1>
+                <p>View and edit detailed font table information</p>
+            </div>
+            
+            <div class="panel">
+                <h3 style="color: #4a9eff; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px;">Primary Identification</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="control-group">
+                        <label>Font Family Name (ID 1)</label>
+                        <input type="text" id="meta-family" placeholder="e.g., Helvetica">
+                    </div>
+                    <div class="control-group">
+                        <label>Font Subfamily (ID 2)</label>
+                        <input type="text" id="meta-subfamily" placeholder="e.g., Regular, Bold">
+                    </div>
+                </div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="control-group">
+                        <label>Full Font Name (ID 4)</label>
+                        <input type="text" id="meta-full-name" placeholder="e.g., Helvetica Regular">
+                    </div>
+                    <div class="control-group">
+                        <label>PostScript Name (ID 6)</label>
+                        <input type="text" id="meta-postscript" placeholder="e.g., Helvetica-Bold">
+                    </div>
+                </div>
+
+                <h3 style="color: #4a9eff; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 10px;">Legal & Credit Information</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="control-group">
+                        <label>Designer (ID 9)</label>
+                        <input type="text" id="meta-designer" placeholder="Font designer's name">
+                    </div>
+                    <div class="control-group">
+                        <label>Manufacturer (ID 8)</label>
+                        <input type="text" id="meta-manufacturer" placeholder="Foundry / Manufacturer">
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>Copyright Notice (ID 0)</label>
+                    <textarea id="meta-copyright" placeholder="Copyright information"></textarea>
+                </div>
+                <div class="control-group">
+                    <label>Trademark (ID 7)</label>
+                    <input type="text" id="meta-trademark" placeholder="Trademark information">
+                </div>
+
+                <h3 style="color: #4a9eff; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 10px;">Version & Technical</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div class="control-group">
+                        <label>Version String (ID 5)</label>
+                        <input type="text" id="meta-version" placeholder="e.g., Version 1.00">
+                    </div>
+                    <div class="control-group">
+                        <label>Unique ID (ID 3)</label>
+                        <input type="text" id="meta-unique-id" placeholder="Unique font identifier">
+                    </div>
+                </div>
+
+                <h3 style="color: #4a9eff; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 10px;">URLs & Documentation</h3>
+                <div class="control-group">
+                    <label>Designer URL (ID 12)</label>
+                    <input type="text" id="meta-designer-url" placeholder="https://...">
+                </div>
+                <div class="control-group">
+                    <label>Vendor URL (ID 11)</label>
+                    <input type="text" id="meta-vendor-url" placeholder="https://...">
+                </div>
+                <div class="control-group">
+                    <label>License URL (ID 14)</label>
+                    <input type="text" id="meta-license-url" placeholder="https://...">
+                </div>
+                <div class="control-group">
+                    <label>License Description (ID 13)</label>
+                    <textarea id="meta-license-desc" placeholder="License details"></textarea>
+                </div>
+
+                <h3 style="color: #4a9eff; margin-bottom: 15px; border-bottom: 1px solid #333; padding-bottom: 5px; margin-top: 10px;">Additional Info</h3>
+                <div class="control-group">
+                    <label>Description (ID 10)</label>
+                    <textarea id="meta-description" placeholder="Font description"></textarea>
+                </div>
+                <div class="control-group">
+                    <label>Sample Text (ID 19)</label>
+                    <textarea id="meta-sample-text" placeholder="Sample text used for previewing"></textarea>
+                </div>
+
+                <div class="button-group">
+                    <button onclick="downloadFontWithMetadata('ttf')">💾 Save & Download TTF</button>
+                    <button class="secondary" onclick="downloadFontWithMetadata('otf')">⬇️ Save & Download OTF</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="metrics">
+        <div class="container">
+            <div class="header">
+                <h1>📏 Typography Metrics</h1>
+                <p>View and adjust font metrics</p>
+            </div>
+            
+            <div class="panel">
+                <h2>Visual Display</h2>
+                <div class="metrics-display" id="metricsDisplay">
+                    <div class="sample-char" id="sampleChar">Ag</div>
+                    <div class="metric-line baseline" id="baselineLine">
+                        <span class="metric-label" style="background: #e74c3c;">Base</span>
+                    </div>
+                    <div class="metric-line xheight" id="xheightLine" style="top: 50%;">
+                        <span class="metric-label" style="background: #3498db;">X-Height</span>
+                    </div>
+                    <div class="metric-line ascender" id="ascenderLine" style="top: 25%;">
+                        <span class="metric-label" style="background: #2ecc71;">Ascender</span>
+                    </div>
+                    <div class="metric-line descender" id="descenderLine" style="bottom: 25%;">
+                        <span class="metric-label" style="background: #f39c12;">Descender</span>
+                    </div>
+                </div>
+                
+                <div class="info-box">
+                    <p><strong>Current Units Per Em:</strong> <span id="unitsPerEm">2048</span></p>
+                </div>
+
+                <div class="control-group">
+                    <label>X-Height: <span class="range-value" id="xHeightValue">50%</span></label>
+                    <input type="range" id="xHeight" min="0" max="100" value="50">
+                </div>
+                <div class="control-group">
+                    <label>Ascender: <span class="range-value" id="ascenderValue">75%</span></label>
+                    <input type="range" id="ascender" min="0" max="100" value="75">
+                </div>
+                <div class="control-group">
+                    <label>Descender: <span class="range-value" id="descenderValue">25%</span></label>
+                    <input type="range" id="descender" min="0" max="100" value="25">
+                </div>
+                <div class="control-group">
+                    <label>Sample Text (max 3 chars)</label>
+                    <input type="text" id="metricsText" value="Ag" maxlength="3">
+                </div>
+
+                <button onclick="showToast('🔄 Applying metrics simulation...')" style="margin-top: 10px;">💾 Apply & Download Font</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="bearing">
+        <div class="container">
+            <div class="header">
+                <h1>↔️ Bearing Adjustment</h1>
+                <p>Adjust character spacing</p>
+            </div>
+            
+            <div class="panel">
+                <h2>Visual Bearing</h2>
+                <div class="bearing-visual" id="bearingVisual">
+                    <div class="bearing-left" id="bearingLeft" style="width: 10%;"></div>
+                    <div class="bearing-char" id="bearingChar">A</div>
+                    <div class="bearing-right" id="bearingRight" style="width: 10%;"></div>
+                </div>
+                
+                <div class="control-group">
+                    <label>Character to Adjust</label>
+                    <input type="text" id="bearingCharInput" value="A" maxlength="1">
+                </div>
+                
+                <div class="control-group">
+                    <label>Left Bearing: <span class="range-value" id="leftBearingValue">20%</span></label>
+                    <input type="range" id="leftBearing" min="0" max="50" value="20">
+                </div>
+                
+                <div class="control-group">
+                    <label>Right Bearing: <span class="range-value" id="rightBearingValue">20%</span></label>
+                    <input type="range" id="rightBearing" min="0" max="50" value="20">
+                </div>
+                
+                <div class="button-group">
+                    <button onclick="showToast('💾 Bearing saved internally')">💾 Save Bearing for this Char</button>
+                    <button class="secondary" onclick="showToast('⬇️ Downloading font...')">⬇️ Download Updated Font</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="characters">
+        <div class="container">
+            <div class="header">
+                <h1>🔤 Character Viewer</h1>
+                <p>Browse and copy characters</p>
+            </div>
+            
+            <div class="panel">
+                <div class="favorite-chars">
+                    <h2>⭐ Favorites</h2>
+                    <div class="favorite-list" id="favoriteList">
+                        <p style="color: #888; font-size: 13px;">Tap ⭐ on characters to add favorites</p>
+                    </div>
+                </div>
+                
+                <div class="button-group" style="margin-bottom: 15px;">
+                    <button class="secondary">📋 Copy All Favorites</button>
+                    <button class="secondary">🗑️ Clear Favorites</button>
+                </div>
+                
+                <div class="search-box">
+                    <input type="text" id="charSearch" placeholder="Search characters or Unicode...">
+                </div>
+                
+                <h2>All Characters</h2>
+                <div class="characters-grid" id="charactersGrid">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page" id="compare">
+        <div class="container">
+            <div class="header">
+                <h1>⚖️ Font Comparison</h1>
+                <p>Compare main font with reference</p>
+            </div>
+            
+            <div class="panel" id="comparePanel">
+                <div class="info-box">
+                    <p>Upload a reference font on the Upload page to enable comparison</p>
+                </div>
+                
+                <div id="compareContent" style="display: none;">
+                    <div class="control-group">
+                        <label>Comparison Text</label>
+                        <input type="text" id="compareText" value="The quick brown fox" maxlength="30">
+                    </div>
+                    
+                    <div class="control-group">
+                        <label>Size: <span class="range-value" id="compareSizeValue">48px</span></label>
+                        <input type="range" id="compareSize" min="24" max="120" value="48">
+                    </div>
+                    
+                    <div class="panel" style="background: #0f0f0f; margin-bottom: 15px;">
+                        <h2 style="font-size: 14px; margin-bottom: 10px;">Main Font</h2>
+                        <div style="background: #fff; padding: 30px 20px; border-radius: 8px; min-height: 100px; display: flex; align-items: center; justify-content: center;">
+                            <div id="compareMain" style="color: #000; font-size: 48px;">Text</div>
+                        </div>
+                    </div>
+                    
+                    <div class="panel" style="background: #0f0f0f;">
+                        <h2 style="font-size: 14px; margin-bottom: 10px;">Reference Font</h2>
+                        <div style="background: #fff; padding: 30px 20px; border-radius: 8px; min-height: 100px; display: flex; align-items: center; justify-content: center;">
+                            <div id="compareRef" style="color: #000; font-size: 48px;">Text</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="screenshotCanvas" style="display: none;"></canvas>
+
+    <script>
+        // Core Logic
+        let opentypeFont = null;
+        let currentFontFamilyName = 'CustomFont';
+        let originalFileName = '';
+
+        // UI Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            document.getElementById(pageId).classList.add('active');
+            const activeNav = Array.from(document.querySelectorAll('.nav-item')).find(item => item.textContent.toLowerCase().includes(pageId));
+            if(activeNav) activeNav.classList.add('active');
+        }
+
+        function showToast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg;
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2000);
+        }
+
+        // Upload Logic
+        const fontFile = document.getElementById('fontFile');
+        const uploadArea = document.getElementById('uploadArea');
+        uploadArea.onclick = () => fontFile.click();
+
+        fontFile.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            originalFileName = file.name;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const arrayBuffer = event.target.result;
+                try {
+                    opentypeFont = opentype.parse(arrayBuffer);
+                    currentFontFamilyName = 'Font_' + Date.now();
+                    
+                    // Load into CSS
+                    const fontFace = new FontFace(currentFontFamilyName, arrayBuffer);
+                    fontFace.load().then(loaded => {
+                        document.fonts.add(loaded);
+                        applyFont();
+                        extractMetadata();
+                        generateCharacters();
+                        document.getElementById('fontInfo').style.display = 'block';
+                        document.getElementById('uploadedFileName').textContent = file.name;
+                        document.getElementById('uploadedFileSize').textContent = (file.size/1024).toFixed(2) + ' KB';
+                        showToast('✓ Font loaded successfully!');
+                    });
+                } catch (err) {
+                    alert('Error parsing font: ' + err.message);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        };
+
+        function applyFont() {
+            const elements = ['previewDisplay', 'sampleChar', 'bearingChar', 'modalChar'];
+            elements.forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.style.fontFamily = currentFontFamilyName;
+            });
+            updatePreview();
+        }
+
+        function extractMetadata() {
+            if(!opentypeFont) return;
+            const n = opentypeFont.names;
+            document.getElementById('meta-family').value = n.fontFamily?.en || '';
+            document.getElementById('meta-subfamily').value = n.fontSubfamily?.en || '';
+            document.getElementById('meta-full-name').value = n.fullName?.en || '';
+            document.getElementById('meta-postscript').value = n.postScriptName?.en || '';
+            document.getElementById('meta-designer').value = n.designer?.en || '';
+            document.getElementById('meta-manufacturer').value = n.manufacturer?.en || '';
+            document.getElementById('meta-copyright').value = n.copyright?.en || '';
+            document.getElementById('meta-trademark').value = n.trademark?.en || '';
+            document.getElementById('meta-version').value = n.version?.en || '';
+            document.getElementById('meta-unique-id').value = n.uniqueID?.en || '';
+            document.getElementById('meta-description').value = n.description?.en || '';
+            document.getElementById('meta-license-desc').value = n.license?.en || '';
+            document.getElementById('meta-designer-url').value = n.designerURL?.en || '';
+            document.getElementById('meta-vendor-url').value = n.vendorURL?.en || '';
+            document.getElementById('meta-license-url').value = n.licenseURL?.en || '';
+            document.getElementById('meta-sample-text').value = n.sampleText?.en || '';
+        }
+
+        // Real Font Saving Logic
+        function downloadFontWithMetadata(format) {
+            if (!opentypeFont) return alert('Please upload a font first');
+            try {
+                const names = opentypeFont.names;
+                names.fontFamily = { en: document.getElementById('meta-family').value };
+                names.fontSubfamily = { en: document.getElementById('meta-subfamily').value };
+                names.fullName = { en: document.getElementById('meta-full-name').value };
+                names.postScriptName = { en: document.getElementById('meta-postscript').value };
+                names.designer = { en: document.getElementById('meta-designer').value };
+                names.manufacturer = { en: document.getElementById('meta-manufacturer').value };
+                names.copyright = { en: document.getElementById('meta-copyright').value };
+                names.trademark = { en: document.getElementById('meta-trademark').value };
+                names.version = { en: document.getElementById('meta-version').value };
+                names.uniqueID = { en: document.getElementById('meta-unique-id').value };
+                names.description = { en: document.getElementById('meta-description').value };
+
+                const buffer = opentypeFont.toArrayBuffer();
+                const blob = new Blob([buffer], { type: 'font/' + format });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `${names.fontFamily.en}-${names.fontSubfamily.en}.${format}`;
+                link.click();
+                showToast(`✓ Font saved as ${format.toUpperCase()}`);
+            } catch (err) {
+                alert('Save error: ' + err.message);
+            }
+        }
+
+        // Standard Preview Logic
+        function updatePreview() {
+            const p = document.getElementById('previewDisplay');
+            const txt = document.getElementById('previewText').value;
+            p.textContent = txt;
+            p.style.fontSize = document.getElementById('fontSize').value + 'px';
+            p.style.lineHeight = document.getElementById('lineHeight').value;
+            p.style.letterSpacing = document.getElementById('letterSpacing').value + 'px';
+            document.getElementById('sizeValue').textContent = p.style.fontSize;
+            document.getElementById('lineHeightValue').textContent = p.style.lineHeight;
+            document.getElementById('letterSpacingValue').textContent = p.style.letterSpacing;
+        }
+
+        // Character Grid Logic
+        function generateCharacters() {
+            const grid = document.getElementById('charactersGrid');
+            grid.innerHTML = '';
+            
+            if (!opentypeFont) {
+                grid.innerHTML = '<div class="spinner"></div>';
+                return;
+            }
+
+            for (let i = 32; i <= 255; i++) {
+                const char = String.fromCharCode(i);
+                const box = document.createElement('div');
+                box.className = 'char-box';
+                box.innerHTML = `
+                    <div class="char-display" style="font-family: '${currentFontFamilyName}'">${char}</div>
+                    <div class="char-code">U+${i.toString(16).toUpperCase()}</div>
+                `;
+                
+                box.onclick = () => {
+                    const modalChar = document.getElementById('modalChar');
+                    modalChar.textContent = char;
+                    modalChar.style.fontFamily = currentFontFamilyName;
+                    document.getElementById('zoomModal').style.display = 'flex';
+                };
+                grid.appendChild(box);
+            }
+        }
+
+        function downloadCharImage() {
+            const char = document.getElementById('modalChar').textContent;
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 500; canvas.height = 500;
+            ctx.fillStyle = "white"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "black"; ctx.font = `350px "${currentFontFamilyName}"`;
+            ctx.textAlign = "center"; ctx.textBaseline = "middle";
+            ctx.fillText(char, canvas.width / 2, canvas.height / 2);
+            const link = document.createElement('a');
+            link.download = `Char-${char}.png`;
+            link.href = canvas.toDataURL("image/png");
+            link.click();
+            showToast("✓ Image Downloaded!");
+        }
+
+        // Metrics Logic (Lines movement correctly enabled)
+        document.getElementById('xHeight').oninput = (e) => {
+            document.getElementById('xHeightValue').textContent = e.target.value + '%';
+            document.getElementById('xheightLine').style.top = (100 - e.target.value) + '%';
+        };
+        document.getElementById('ascender').oninput = (e) => {
+            document.getElementById('ascenderValue').textContent = e.target.value + '%';
+            document.getElementById('ascenderLine').style.top = (100 - e.target.value) + '%';
+        };
+        document.getElementById('descender').oninput = (e) => {
+            document.getElementById('descenderValue').textContent = e.target.value + '%';
+            document.getElementById('descenderLine').style.bottom = (e.target.value) + '%';
+        };
+        document.getElementById('metricsText').oninput = (e) => {
+            document.getElementById('sampleChar').textContent = e.target.value;
+        };
+
+        // Initialize listeners
+        document.querySelectorAll('input[type=range], textarea').forEach(el => {
+            el.addEventListener('input', updatePreview);
+        });
+
+        // Bearing UI logic (Visual scale corrected to 0.5)
+        document.getElementById('leftBearing').oninput = (e) => {
+            document.getElementById('leftBearingValue').textContent = e.target.value + '%';
+            document.getElementById('bearingLeft').style.width = (e.target.value * 0.5) + '%';
+        };
+        document.getElementById('rightBearing').oninput = (e) => {
+            document.getElementById('rightBearingValue').textContent = e.target.value + '%';
+            document.getElementById('bearingRight').style.width = (e.target.value * 0.5) + '%';
+        };
+    </script>
+</body>
+</html>

@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Custom Font Baseline Tester</title>
+<style>
+  body {
+    background: #f5f5f5;
+    color: #222;
+    font-family: sans-serif;
+    padding: 30px;
+  }
+
+  h2 {
+    margin-bottom: 6px;
+  }
+
+  input[type="file"], input[type="range"] {
+    margin: 10px 0;
+  }
+
+  .test-area {
+    position: relative;
+    border: 1px solid #ccc;
+    background: #fff;
+    margin-top: 30px;
+    height: 400px;
+    overflow: hidden;
+    cursor: grab;
+  }
+
+  /* Measurement lines */
+  .line {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    border-top: 1px dashed;
+    z-index: 1;
+  }
+  .ascender  { top: 60px; border-color: orange; }
+  .capline   { top: 100px; border-color: green; }
+  .xheight   { top: 140px; border-color: blue; }
+  .baseline  { top: 200px; border-color: red; }
+  .descender { top: 240px; border-color: purple; }
+
+  .label {
+    position: absolute;
+    left: 8px;
+    font-size: 12px;
+    background: #fff;
+    padding: 1px 4px;
+  }
+
+  .client-img {
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translate(-50%, 0) scale(1);
+    opacity: 0.4;
+    max-height: none;
+    max-width: none;
+    cursor: grab;
+  }
+
+  .sample-text {
+    position: absolute;
+    top: 140px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 160px;
+    line-height: 1;
+    color: #000;
+    text-align: center;
+    white-space: nowrap;
+    z-index: 2;
+  }
+</style>
+</head>
+<body>
+
+<h2>Custom Font Baseline & Height Tester</h2>
+<p>Select your <strong>.ttf</strong> or <strong>.otf</strong> font file below, then visually compare it with the client sample image and baseline lines.</p>
+
+<label><strong>Upload your font:</strong> <input type="file" id="fontUpload" accept=".ttf,.otf"></label>
+<br>
+<label><strong>Upload client sample image:</strong> <input type="file" id="imgUpload" accept="image/*"></label>
+<br>
+<label>Image opacity: <input type="range" id="opacityControl" min="0" max="1" step="0.05" value="0.4"></label>
+<br>
+<label>Image scale: <input type="range" id="scaleControl" min="0.1" max="2" step="0.01" value="1"></label>
+
+<div class="test-area" id="testArea">
+  <!-- measurement lines -->
+  <div class="line ascender"></div>
+  <div class="label" style="top:58px;color:orange;">Ascender (18.5)</div>
+
+  <div class="line capline"></div>
+  <div class="label" style="top:98px;color:green;">Cap Height (12.5)</div>
+
+  <div class="line xheight"></div>
+  <div class="label" style="top:138px;color:blue;">x-Height (9.5)</div>
+
+  <div class="line baseline"></div>
+  <div class="label" style="top:198px;color:red;">Baseline (0)</div>
+
+  <div class="line descender"></div>
+  <div class="label" style="top:238px;color:purple;">Descender (-1.4)</div>
+
+  <!-- Uploaded image -->
+  <img id="clientImg" class="client-img" alt="Client Sample">
+
+  <!-- Font preview -->
+  <div id="sampleText" class="sample-text" contenteditable="true">Mvigja 2025</div>
+</div>
+
+<script>
+const fontUpload = document.getElementById('fontUpload');
+const sampleText = document.getElementById('sampleText');
+const imgUpload = document.getElementById('imgUpload');
+const clientImg = document.getElementById('clientImg');
+const opacityControl = document.getElementById('opacityControl');
+const scaleControl = document.getElementById('scaleControl');
+
+fontUpload.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const fontName = file.name.replace(/\.[^/.]+$/, '');
+  const url = URL.createObjectURL(file);
+
+  const fontFace = new FontFace(fontName, `url(${url})`);
+  await fontFace.load();
+  document.fonts.add(fontFace);
+  sampleText.style.fontFamily = `'${fontName}', sans-serif`;
+});
+
+imgUpload.addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (file) {
+    clientImg.src = URL.createObjectURL(file);
+    // reset position
+    clientImg.style.top = '40px';
+    clientImg.style.left = '50%';
+    clientImg.style.transform = 'translate(-50%, 0) scale(1)';
+  }
+});
+
+opacityControl.addEventListener('input', (e) => {
+  clientImg.style.opacity = e.target.value;
+});
+
+scaleControl.addEventListener('input', (e) => {
+  const scale = e.target.value;
+  const transform = clientImg.style.transform;
+  // preserve translate while updating scale
+  const translateMatch = transform.match(/translate\(([^)]+)\)/);
+  const translateValue = translateMatch ? translateMatch[1] : '-50%, 0';
+  clientImg.style.transform = `translate(${translateValue}) scale(${scale})`;
+});
+
+// Make image draggable
+let isDragging = false;
+let dragStartX, dragStartY;
+let imgStartX, imgStartY;
+
+clientImg.addEventListener('mousedown', (e) => {
+  isDragging = true;
+  dragStartX = e.clientX;
+  dragStartY = e.clientY;
+
+  const rect = clientImg.getBoundingClientRect();
+  const parentRect = clientImg.parentElement.getBoundingClientRect();
+  imgStartX = rect.left - parentRect.left;
+  imgStartY = rect.top - parentRect.top;
+
+  clientImg.style.cursor = 'grabbing';
+  e.preventDefault();
+});
+
+document.addEventListener('mousemove', (e) => {
+  if (!isDragging) return;
+  const dx = e.clientX - dragStartX;
+  const dy = e.clientY - dragStartY;
+  clientImg.style.left = imgStartX + dx + 'px';
+  clientImg.style.top = imgStartY + dy + 'px';
+  clientImg.style.transform = `translate(0, 0) scale(${scaleControl.value})`;
+});
+
+document.addEventListener('mouseup', () => {
+  if (isDragging) {
+    isDragging = false;
+    clientImg.style.cursor = 'grab';
+  }
+});
+</script>
+
+</body>
+</html>

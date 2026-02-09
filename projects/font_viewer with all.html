@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Font Viewer - TTF/OTF Preview</title>
+  <style>
+    :root {
+      --bg-primary: #f0f0f0;
+      --bg-secondary: #fff;
+      --text-primary: #000;
+      --text-secondary: #333;
+      --border-color: #ccc;
+      --button-bg: #4a90e2;
+      --button-text: white;
+      --accent-color: #2c5aa0;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #2d2d2d;
+      --text-primary: #e0e0e0;
+      --text-secondary: #b0b0b0;
+      --border-color: #555;
+      --button-bg: #4a90e2;
+      --button-text: white;
+      --accent-color: #6bb6ff;
+    }
+
+    [data-theme="navy"] {
+      --bg-primary: #0f1419;
+      --bg-secondary: #1e2a3a;
+      --text-primary: #f0f6ff;
+      --text-secondary: #a8c8ec;
+      --border-color: #34495e;
+      --button-bg: #2c3e50;
+      --button-text: #ecf0f1;
+      --accent-color: #3498db;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 20px;
+      transition: all 0.3s ease;
+      margin: 0;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .theme-switcher {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: var(--bg-secondary);
+      padding: 8px 12px;
+      border-radius: 25px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .theme-option {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .theme-option.active {
+      background: var(--accent-color);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .theme-option:hover:not(.active) {
+      background: var(--border-color);
+      transform: translateY(-1px);
+    }
+
+    .theme-icon {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-section {
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      background: var(--button-bg);
+      color: var(--button-text);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+    }
+
+    .file-input-wrapper:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    input[type="file"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .font-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+
+    .info-card {
+      padding: 15px;
+      background: var(--bg-primary);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: var(--accent-color);
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .info-value {
+      font-family: monospace;
+      font-size: 16px;
+      word-break: break-all;
+    }
+
+    .preview-section {
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .preview-section h3 {
+      margin: 0 0 15px 0;
+      color: var(--accent-color);
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .text-input-section {
+      margin-bottom: 20px;
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 15px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+      resize: vertical;
+      min-height: 60px;
+    }
+
+    .text-input:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .size-controls {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+    }
+
+    .size-control {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .size-control label {
+      font-weight: 500;
+      min-width: 80px;
+    }
+
+    .size-slider {
+      width: 150px;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--border-color);
+      outline: none;
+      appearance: none;
+    }
+
+    .size-slider::-webkit-slider-thumb {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent-color);
+      cursor: pointer;
+    }
+
+    .size-slider::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: var(--accent-color);
+      cursor: pointer;
+      border: none;
+    }
+
+    .size-input {
+      width: 80px;
+      padding: 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    .preview-display {
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 30px;
+      min-height: 200px;
+      line-height: 1.4;
+      word-wrap: break-word;
+      overflow-wrap: break-word;
+    }
+
+    .sample-texts {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 15px;
+      flex-wrap: wrap;
+    }
+
+    .sample-btn {
+      padding: 8px 16px;
+      background: var(--border-color);
+      color: var(--text-primary);
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: all 0.3s ease;
+    }
+
+    .sample-btn:hover {
+      background: var(--accent-color);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .controls button {
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: var(--button-bg);
+      color: var(--button-text);
+      font-weight: 600;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .controls button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .controls button:active {
+      transform: translateY(0);
+    }
+
+    .controls button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .theme-switcher {
+        justify-content: center;
+      }
+      
+      .size-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .size-control {
+        justify-content: space-between;
+      }
+      
+      .controls {
+        flex-direction: column;
+      }
+      
+      .controls button {
+        width: 100%;
+      }
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .loading {
+      position: relative;
+    }
+
+    .loading::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 20px;
+      height: 20px;
+      margin: -10px 0 0 -10px;
+      border: 2px solid transparent;
+      border-top: 2px solid var(--accent-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body data-theme="light">
+
+  <div class="header">
+    <h2>🔤 Font Viewer - TTF/OTF Preview Tool</h2>
+    <div class="theme-switcher">
+      <div class="theme-option active" data-theme="light" onclick="setTheme('light')">
+        <div class="theme-icon">☀️</div>
+        <span>Light</span>
+      </div>
+      <div class="theme-option" data-theme="dark" onclick="setTheme('dark')">
+        <div class="theme-icon">🌙</div>
+        <span>Dark</span>
+      </div>
+      <div class="theme-option" data-theme="navy" onclick="setTheme('navy')">
+        <div class="theme-icon">⚓</div>
+        <span>Navy</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="file-section">
+    <div class="file-input-wrapper">
+      <input type="file" id="fontInput" accept=".ttf,.otf,.woff,.woff2">
+      📁 Choose Font File (TTF/OTF)
+    </div>
+    
+    <div class="font-info hidden" id="fontInfo">
+      <div class="info-card">
+        <div class="info-label">Font Name</div>
+        <div class="info-value" id="fontName">-</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">Font Family</div>
+        <div class="info-value" id="fontFamily">-</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">File Name</div>
+        <div class="info-value" id="fileName">-</div>
+      </div>
+      <div class="info-card">
+        <div class="info-label">File Size</div>
+        <div class="info-value" id="fileSize">-</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="preview-section hidden" id="previewSection">
+    <h3>✨ Font Preview</h3>
+    
+    <div class="text-input-section">
+      <textarea 
+        class="text-input" 
+        id="customText" 
+        placeholder="Type your custom text here to preview with the loaded font..."
+        rows="3">The quick brown fox jumps over the lazy dog
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+1234567890 !@#$%^&*()</textarea>
+    </div>
+
+    <div class="sample-texts">
+      <button class="sample-btn" onclick="setSampleText('pangram')">Pangram</button>
+      <button class="sample-btn" onclick="setSampleText('alphabet')">Alphabet</button>
+      <button class="sample-btn" onclick="setSampleText('numbers')">Numbers</button>
+      <button class="sample-btn" onclick="setSampleText('lorem')">Lorem Ipsum</button>
+      <button class="sample-btn" onclick="setSampleText('special')">Special Chars</button>
+    </div>
+
+    <div class="size-controls">
+      <div class="size-control">
+        <label>Font Size:</label>
+        <input type="range" class="size-slider" id="fontSizeSlider" min="8" max="120" value="24" oninput="updateFontSize(this.value)">
+        <input type="number" class="size-input" id="fontSizeInput" min="8" max="200" value="24" onchange="updateFontSize(this.value)">
+        <span>px</span>
+      </div>
+      <div class="size-control">
+        <label>Line Height:</label>
+        <input type="range" class="size-slider" id="lineHeightSlider" min="0.8" max="3" step="0.1" value="1.4" oninput="updateLineHeight(this.value)">
+        <input type="number" class="size-input" id="lineHeightInput" min="0.5" max="5" step="0.1" value="1.4" onchange="updateLineHeight(this.value)">
+      </div>
+    </div>
+
+    <div class="preview-display" id="previewDisplay">
+      Upload a font file to see the preview here...
+    </div>
+  </div>
+
+  <div class="controls">
+    <button id="downloadBtn" onclick="downloadFontInfo()" disabled>📄 Download Font Info</button>
+    <button onclick="copyPreviewText()">📋 Copy Preview Text</button>
+  </div>
+
+  <script>
+    let currentFont = null;
+    let currentFontName = '';
+
+    // Theme management
+    function setTheme(theme) {
+      document.body.setAttribute('data-theme', theme);
+      
+      document.querySelectorAll('.theme-option').forEach(option => {
+        option.classList.remove('active');
+      });
+      document.querySelector(`[data-theme="${theme}"]`).classList.add('active');
+      
+      // Save theme preference (note: localStorage not available in Claude artifacts)
+      try {
+        localStorage.setItem('preferred-theme', theme);
+      } catch (e) {
+        // Fallback for environments without localStorage
+      }
+    }
+
+    // Load saved theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      try {
+        const savedTheme = localStorage.getItem('preferred-theme') || 'light';
+        setTheme(savedTheme);
+      } catch (e) {
+        setTheme('light');
+      }
+    });
+
+    // Font file handling
+    document.getElementById('fontInput').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const validTypes = ['.ttf', '.otf', '.woff', '.woff2'];
+      const fileExtension = '.' + file.name.split('.').pop().toLowerCase();
+      
+      if (!validTypes.includes(fileExtension)) {
+        alert('Please upload a valid font file (TTF, OTF, WOFF, WOFF2)');
+        return;
+      }
+
+      loadFont(file);
+    });
+
+    async function loadFont(file) {
+      try {
+        // Create font face
+        const arrayBuffer = await file.arrayBuffer();
+        const fontFace = new FontFace('CustomFont', arrayBuffer);
+        await fontFace.load();
+        document.fonts.add(fontFace);
+        
+        currentFont = fontFace;
+        currentFontName = file.name.split('.')[0];
+
+        // Update font info
+        updateFontInfo(file, fontFace);
+        
+        // Show preview section
+        document.getElementById('fontInfo').classList.remove('hidden');
+        document.getElementById('previewSection').classList.remove('hidden');
+        document.getElementById('downloadBtn').disabled = false;
+        
+        // Update preview
+        updatePreview();
+        
+      } catch (error) {
+        console.error('Error loading font:', error);
+        alert('Error loading font file. Please try another file.');
+      }
+    }
+
+    function updateFontInfo(file, fontFace) {
+      document.getElementById('fontName').textContent = fontFace.family || 'Unknown';
+      document.getElementById('fontFamily').textContent = fontFace.family || 'Unknown';
+      document.getElementById('fileName').textContent = file.name;
+      document.getElementById('fileSize').textContent = formatFileSize(file.size);
+    }
+
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function updatePreview() {
+      const previewDisplay = document.getElementById('previewDisplay');
+      const customText = document.getElementById('customText').value || 'Upload a font file to see the preview here...';
+      
+      previewDisplay.textContent = customText;
+      previewDisplay.style.fontFamily = currentFont ? 'CustomFont, sans-serif' : 'sans-serif';
+    }
+
+    function updateFontSize(size) {
+      document.getElementById('fontSizeSlider').value = size;
+      document.getElementById('fontSizeInput').value = size;
+      document.getElementById('previewDisplay').style.fontSize = size + 'px';
+    }
+
+    function updateLineHeight(height) {
+      document.getElementById('lineHeightSlider').value = height;
+      document.getElementById('lineHeightInput').value = height;
+      document.getElementById('previewDisplay').style.lineHeight = height;
+    }
+
+    function setSampleText(type) {
+      const textArea = document.getElementById('customText');
+      const sampleTexts = {
+        pangram: 'The quick brown fox jumps over the lazy dog.\nPack my box with five dozen liquor jugs.',
+        alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz',
+        numbers: '1234567890\n½ ¼ ¾ ⅓ ⅔ ⅕ ⅖ ⅗ ⅘ ⅙ ⅚',
+        lorem: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+        special: '!@#$%^&*()_+-=[]{}|;:,.<>?\n"\'`~€£¥¢∞§¶•ªº–≠'
+      };
+      
+      textArea.value = sampleTexts[type] || sampleTexts.pangram;
+      updatePreview();
+    }
+
+    function downloadFontInfo() {
+      if (!currentFont) {
+        alert('No font loaded!');
+        return;
+      }
+
+      const fontInfo = {
+        fileName: document.getElementById('fileName').textContent,
+        fontName: document.getElementById('fontName').textContent,
+        fontFamily: document.getElementById('fontFamily').textContent,
+        fileSize: document.getElementById('fileSize').textContent,
+        previewText: document.getElementById('customText').value,
+        fontSize: document.getElementById('fontSizeInput').value + 'px',
+        lineHeight: document.getElementById('lineHeightInput').value,
+        generatedAt: new Date().toISOString()
+      };
+
+      const content = `Font Information Report
+========================
+
+File Name: ${fontInfo.fileName}
+Font Name: ${fontInfo.fontName}
+Font Family: ${fontInfo.fontFamily}
+File Size: ${fontInfo.fileSize}
+Font Size: ${fontInfo.fontSize}
+Line Height: ${fontInfo.lineHeight}
+
+Preview Text:
+${fontInfo.previewText}
+
+Generated: ${new Date(fontInfo.generatedAt).toLocaleString()}
+`;
+
+      const blob = new Blob([content], { type: 'text/plain' });
+      const link = document.createElement('a');
+      link.download = `${currentFontName}_info.txt`;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+    }
+
+    function copyPreviewText() {
+      const previewText = document.getElementById('customText').value;
+      if (!previewText) {
+        alert('No text to copy!');
+        return;
+      }
+
+      navigator.clipboard.writeText(previewText).then(() => {
+        // Visual feedback
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '✅ Copied!';
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+        }, 2000);
+      }).catch(() => {
+        alert('Failed to copy text to clipboard');
+      });
+    }
+
+    // Event listeners
+    document.getElementById('customText').addEventListener('input', updatePreview);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        if (!document.getElementById('downloadBtn').disabled) {
+          downloadFontInfo();
+        }
+      }
+      if (e.ctrlKey && e.key === 'c' && e.target === document.getElementById('customText')) {
+        // Allow normal copy behavior in textarea
+        return;
+      }
+    });
+
+    // Initialize default preview
+    updatePreview();
+  </script>
+
+</body>
+</html>

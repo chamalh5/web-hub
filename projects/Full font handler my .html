@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Font Previewer & Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background: #1a1a2e;
+            color: #eee;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #4ecdc4;
+        }
+
+        .controls {
+            background: #16213e;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #4ecdc4;
+            font-weight: 600;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            background: #0f3460;
+            border: 2px solid #4ecdc4;
+            border-radius: 5px;
+            color: #eee;
+            cursor: pointer;
+        }
+
+        input[type="text"], input[type="number"], select, textarea {
+            width: 100%;
+            padding: 10px;
+            background: #0f3460;
+            border: 2px solid #4ecdc4;
+            border-radius: 5px;
+            color: #eee;
+            font-size: 16px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            font-family: inherit;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: #16213e;
+            border: 2px solid #4ecdc4;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #eee;
+            font-weight: 600;
+        }
+
+        .tab:hover {
+            background: #0f3460;
+        }
+
+        .tab.active {
+            background: #4ecdc4;
+            color: #16213e;
+        }
+
+        .content {
+            background: #16213e;
+            padding: 30px;
+            border-radius: 10px;
+            min-height: 400px;
+        }
+
+        .preview-text {
+            font-size: 48px;
+            line-height: 1.5;
+            margin: 20px 0;
+            padding: 20px;
+            background: #0f3460;
+            border-radius: 5px;
+            word-wrap: break-word;
+        }
+
+        .glyph-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .glyph-card {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .glyph-card:hover {
+            border-color: #4ecdc4;
+            transform: scale(1.05);
+        }
+
+        .glyph-char {
+            font-size: 48px;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .glyph-code {
+            font-size: 11px;
+            color: #888;
+        }
+
+        .metrics-container {
+            position: relative;
+            background: #0f3460;
+            padding: 40px;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+
+        .metrics-display {
+            position: relative;
+            display: inline-block;
+            min-width: 300px;
+        }
+
+        .sample-text {
+            font-size: 120px;
+            line-height: 1;
+            position: relative;
+            display: inline-block;
+        }
+
+        .metric-line {
+            position: absolute;
+            left: -30px;
+            right: -30px;
+            height: 2px;
+            background: #4ecdc4;
+        }
+
+        .metric-label {
+            position: absolute;
+            left: -120px;
+            font-size: 12px;
+            color: #4ecdc4;
+            white-space: nowrap;
+            font-weight: 600;
+        }
+
+        .baseline { background: #ff6b6b; }
+        .ascender-line { background: #4ecdc4; }
+        .descender-line { background: #ffe66d; }
+        .cap-height-line { background: #95e1d3; }
+        .x-height-line { background: #ffa8a8; }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .info-card {
+            background: #0f3460;
+            padding: 15px;
+            border-radius: 5px;
+            border-left: 4px solid #4ecdc4;
+        }
+
+        .info-label {
+            color: #888;
+            font-size: 12px;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            color: #eee;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .sample-sizes {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .size-sample {
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 5px;
+        }
+
+        .size-label {
+            color: #4ecdc4;
+            font-size: 14px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .waterfall {
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .waterfall-line {
+            margin: 10px 0;
+        }
+
+        .error {
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .success {
+            background: #51cf66;
+            color: white;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: #4ecdc4;
+            color: #16213e;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #45b8b0;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #95e1d3;
+        }
+
+        .btn-secondary:hover {
+            background: #7dd3c0;
+        }
+
+        .test-sample-item {
+            background: #0f3460;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .test-sample-item:hover {
+            border-color: #4ecdc4;
+        }
+
+        .sample-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .sample-controls input[type="range"] {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .sample-controls input[type="number"] {
+            width: 80px;
+        }
+
+        .range-label {
+            color: #4ecdc4;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .metadata-form {
+            display: grid;
+            gap: 20px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .save-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .add-sample-btn {
+            margin-top: 15px;
+        }
+
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: #0f3460;
+            outline: none;
+            height: 8px;
+            border-radius: 5px;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            background: #4ecdc4;
+            cursor: pointer;
+            border-radius: 50%;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            background: #4ecdc4;
+            cursor: pointer;
+            border-radius: 50%;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔤 Font Previewer & Editor</h1>
+
+        <div class="controls">
+            <div class="control-group">
+                <label>Upload Font (TTF/OTF)</label>
+                <input type="file" id="fontFile" accept=".ttf,.otf">
+            </div>
+
+            <div class="control-group">
+                <label>Preview Text</label>
+                <input type="text" id="previewText" value="The quick brown fox jumps over the lazy dog">
+            </div>
+
+            <div class="control-group">
+                <label>Font Size (px)</label>
+                <input type="number" id="fontSize" value="48" min="8" max="500">
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" data-tab="preview">Preview</div>
+            <div class="tab" data-tab="glyphs">All Characters</div>
+            <div class="tab" data-tab="metrics">Metrics & Lines</div>
+            <div class="tab" data-tab="samples">Text Samples</div>
+            <div class="tab" data-tab="test">Custom Test Samples</div>
+            <div class="tab" data-tab="metadata">Font Metadata</div>
+            <div class="tab" data-tab="waterfall">Waterfall</div>
+            <div class="tab" data-tab="info">Font Info</div>
+        </div>
+
+        <div class="content" id="contentArea"></div>
+    </div>
+
+    <script>
+        let currentFont = null;
+        let fontFamily = 'CustomFont';
+        let currentTab = 'preview';
+        let opentypeFont = null;
+        let opentypeLoaded = false;
+
+        // Load OpenType.js dynamically
+        const script = document.createElement('script');
+        script.src = 'opentype.min.js';
+        script.onload = () => {
+            opentypeLoaded = true;
+            console.log('OpenType.js loaded successfully');
+        };
+        script.onerror = () => {
+            console.error('Failed to load OpenType.js');
+        };
+        document.head.appendChild(script);
+        let testSamples = [
+            { text: 'The quick brown fox jumps over the lazy dog', size: 48 },
+            { text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', size: 36 },
+            { text: 'abcdefghijklmnopqrstuvwxyz', size: 36 },
+            { text: '0123456789 !@#$%^&*()', size: 32 }
+        ];
+
+        const tabs = document.querySelectorAll('.tab');
+        const contentArea = document.getElementById('contentArea');
+        const fontFileInput = document.getElementById('fontFile');
+        const previewTextInput = document.getElementById('previewText');
+        const fontSizeInput = document.getElementById('fontSize');
+
+        // Tab switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentTab = tab.dataset.tab;
+                renderContent();
+            });
+        });
+
+        // Font upload
+        fontFileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = async (event) => {
+                try {
+                    const fontBuffer = event.target.result;
+                    fontFamily = 'CustomFont_' + Date.now();
+                    
+                    const fontFace = new FontFace(fontFamily, fontBuffer);
+                    await fontFace.load();
+                    document.fonts.add(fontFace);
+                    
+                    // Parse with opentype.js if available
+                    if (typeof opentype !== 'undefined') {
+                        try {
+                            opentypeFont = opentype.parse(fontBuffer);
+                        } catch (e) {
+                            console.warn('OpenType parsing failed:', e);
+                        }
+                    }
+                    
+                    currentFont = {
+                        name: file.name,
+                        family: fontFamily,
+                        buffer: fontBuffer,
+                        file: file
+                    };
+
+                    extractFontMetrics(fontBuffer);
+                    renderContent();
+                } catch (err) {
+                    contentArea.innerHTML = `<div class="error">Error loading font: ${err.message}</div>`;
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
+
+        // Update on input changes
+        previewTextInput.addEventListener('input', renderContent);
+        fontSizeInput.addEventListener('input', renderContent);
+
+        // Extract basic metrics from font buffer
+        function extractFontMetrics(buffer) {
+            const view = new DataView(buffer);
+            const numTables = view.getUint16(4);
+            let os2Offset = null;
+            
+            for (let i = 0; i < numTables; i++) {
+                const offset = 12 + i * 16;
+                const tag = String.fromCharCode(
+                    view.getUint8(offset),
+                    view.getUint8(offset + 1),
+                    view.getUint8(offset + 2),
+                    view.getUint8(offset + 3)
+                );
+                
+                if (tag === 'OS/2') {
+                    os2Offset = view.getUint32(offset + 8);
+                    break;
+                }
+            }
+
+            if (os2Offset && currentFont) {
+                try {
+                    currentFont.metrics = {
+                        ascender: view.getInt16(os2Offset + 68),
+                        descender: view.getInt16(os2Offset + 70),
+                        xHeight: view.getInt16(os2Offset + 86),
+                        capHeight: view.getInt16(os2Offset + 88),
+                        unitsPerEm: view.getUint16(os2Offset + 4) || 1000
+                    };
+                } catch (e) {
+                    console.log('Could not extract metrics:', e);
+                }
+            }
+        }
+
+        function renderContent() {
+            if (!currentFont) {
+                contentArea.innerHTML = '<p style="text-align: center; color: #888;">Please upload a font file to begin</p>';
+                return;
+            }
+
+            const text = previewTextInput.value;
+            const size = fontSizeInput.value;
+            const style = `font-family: '${fontFamily}', sans-serif;`;
+
+            switch (currentTab) {
+                case 'preview':
+                    renderPreview(text, size, style);
+                    break;
+                case 'glyphs':
+                    renderGlyphs(style);
+                    break;
+                case 'metrics':
+                    renderMetrics(style, size);
+                    break;
+                case 'samples':
+                    renderSamples(style);
+                    break;
+                case 'test':
+                    renderTestSamples(style);
+                    break;
+                case 'metadata':
+                    renderMetadata();
+                    break;
+                case 'waterfall':
+                    renderWaterfall(text, style);
+                    break;
+                case 'info':
+                    renderInfo();
+                    break;
+            }
+        }
+
+        function renderPreview(text, size, style) {
+            contentArea.innerHTML = `
+                <h2 style="color: #4ecdc4; margin-bottom: 20px;">Preview</h2>
+                <div class="preview-text" style="${style} font-size: ${size}px;">${text}</div>
+            `;
+        }
+
+        function renderGlyphs(style) {
+            const ranges = [
+                { name: 'Basic Latin', start: 0x0020, end: 0x007F },
+                { name: 'Latin-1 Supplement', start: 0x00A0, end: 0x00FF },
+                { name: 'Latin Extended-A', start: 0x0100, end: 0x017F },
+                { name: 'Numbers', start: 0x0030, end: 0x0039 },
+                { name: 'Punctuation', start: 0x0021, end: 0x002F }
+            ];
+
+            let html = '<h2 style="color: #4ecdc4; margin-bottom: 20px;">All Characters</h2>';
+
+            ranges.forEach(range => {
+                html += `<h3 style="color: #95e1d3; margin: 30px 0 15px 0;">${range.name}</h3>`;
+                html += '<div class="glyph-grid">';
+                
+                for (let code = range.start; code <= range.end; code++) {
+                    const char = String.fromCodePoint(code);
+                    html += `
+                        <div class="glyph-card" title="U+${code.toString(16).toUpperCase().padStart(4, '0')}">
+                            <span class="glyph-char" style="${style}">${char}</span>
+                            <span class="glyph-code">U+${code.toString(16).toUpperCase()}</span>
+                        </div>
+                    `;
+                }
+                
+                html += '</div>';
+            });
+
+            contentArea.innerHTML = html;
+        }
+
+        function renderMetrics(style, size) {
+            const sampleText = 'Hgxpy';
+            const metrics = currentFont.metrics || {
+                ascender: 800,
+                descender: -200,
+                xHeight: 500,
+                capHeight: 700,
+                unitsPerEm: 1000
+            };
+
+            const scale = parseInt(size) / metrics.unitsPerEm;
+            const ascenderPx = metrics.ascender * scale;
+            const descenderPx = metrics.descender * scale;
+            const xHeightPx = metrics.xHeight * scale;
+            const capHeightPx = metrics.capHeight * scale;
+
+            contentArea.innerHTML = `
+                <h2 style="color: #4ecdc4; margin-bottom: 20px;">Typography Metrics</h2>
+                
+                <div class="metrics-container">
+                    <div class="metrics-display">
+                        <div class="metric-line ascender-line" style="top: ${-ascenderPx}px;">
+                            <span class="metric-label">Ascender</span>
+                        </div>
+                        <div class="metric-line cap-height-line" style="top: ${-capHeightPx}px;">
+                            <span class="metric-label">Cap Height</span>
+                        </div>
+                        <div class="metric-line x-height-line" style="top: ${-xHeightPx}px;">
+                            <span class="metric-label">x-Height</span>
+                        </div>
+                        <div class="metric-line baseline" style="top: 0;">
+                            <span class="metric-label">Baseline</span>
+                        </div>
+                        <div class="metric-line descender-line" style="top: ${-descenderPx}px;">
+                            <span class="metric-label">Descender</span>
+                        </div>
+                        <div class="sample-text" style="${style} font-size: ${size}px;">${sampleText}</div>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-label">Ascender</div>
+                        <div class="info-value">${metrics.ascender} units</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Descender</div>
+                        <div class="info-value">${metrics.descender} units</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">x-Height</div>
+                        <div class="info-value">${metrics.xHeight} units</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Cap Height</div>
+                        <div class="info-value">${metrics.capHeight} units</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Units Per Em</div>
+                        <div class="info-value">${metrics.unitsPerEm}</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Line Height</div>
+                        <div class="info-value">${metrics.ascender - metrics.descender} units</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderSamples(style) {
+            const samples = [
+                { size: 12, text: 'Small body text for captions and footnotes' },
+                { size: 16, text: 'Regular body text for comfortable reading' },
+                { size: 24, text: 'Subheadings and emphasis text' },
+                { size: 36, text: 'Large headings' },
+                { size: 48, text: 'Display text' },
+                { size: 72, text: 'Hero text' }
+            ];
+
+            let html = '<h2 style="color: #4ecdc4; margin-bottom: 20px;">Text Samples</h2><div class="sample-sizes">';
+
+            samples.forEach(sample => {
+                html += `
+                    <div class="size-sample">
+                        <div class="size-label">${sample.size}px</div>
+                        <div style="${style} font-size: ${sample.size}px;">${sample.text}</div>
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            contentArea.innerHTML = html;
+        }
+
+        function renderTestSamples(style) {
+            let html = '<h2 style="color: #4ecdc4; margin-bottom: 20px;">Custom Test Samples</h2>';
+            
+            html += '<div class="sample-sizes">';
+            testSamples.forEach((sample, index) => {
+                html += `
+                    <div class="test-sample-item">
+                        <div class="sample-controls">
+                            <span class="range-label">Size: ${sample.size}px</span>
+                            <input type="range" min="8" max="200" value="${sample.size}" 
+                                   onchange="updateSampleSize(${index}, this.value)" 
+                                   oninput="updateSampleSize(${index}, this.value)">
+                            <input type="number" min="8" max="200" value="${sample.size}" 
+                                   onchange="updateSampleSize(${index}, this.value)">
+                            <button class="btn btn-secondary" onclick="removeSample(${index})">Remove</button>
+                        </div>
+                        <textarea onchange="updateSampleText(${index}, this.value)"
+                                  style="${style}">${sample.text}</textarea>
+                        <div style="${style} font-size: ${sample.size}px; margin-top: 15px; padding: 15px; background: rgba(78, 205, 196, 0.1); border-radius: 5px;">
+                            ${sample.text}
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div>';
+
+            html += '<button class="btn add-sample-btn" onclick="addTestSample()">+ Add New Sample</button>';
+
+            contentArea.innerHTML = html;
+        }
+
+        function renderMetadata() {
+            const font = opentypeFont;
+            if (!font || typeof opentype === 'undefined') {
+                contentArea.innerHTML = `
+                    <div class="error">
+                        <h3>Font Metadata Editor Unavailable</h3>
+                        <p>OpenType.js library is required for metadata editing and saving features.</p>
+                        <p>The library should load automatically. Please refresh the page or check your internet connection.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const names = font.names || {};
+            
+            let html = `
+                <h2 style="color: #4ecdc4; margin-bottom: 20px;">Font Metadata Editor</h2>
+                <div class="metadata-form">
+                    <div class="form-row">
+                        <div class="control-group">
+                            <label>Font Family Name</label>
+                            <input type="text" id="meta-family" value="${names.fontFamily?.en || ''}" placeholder="e.g., Arial">
+                        </div>
+                        <div class="control-group">
+                            <label>Font Subfamily (Style)</label>
+                            <input type="text" id="meta-subfamily" value="${names.fontSubfamily?.en || ''}" placeholder="e.g., Regular, Bold">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="control-group">
+                            <label>Full Font Name</label>
+                            <input type="text" id="meta-fullname" value="${names.fullName?.en || ''}" placeholder="e.g., Arial Regular">
+                        </div>
+                        <div class="control-group">
+                            <label>PostScript Name</label>
+                            <input type="text" id="meta-postscript" value="${names.postScriptName?.en || ''}" placeholder="e.g., Arial-Regular">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="control-group">
+                            <label>Version</label>
+                            <input type="text" id="meta-version" value="${names.version?.en || ''}" placeholder="e.g., Version 1.0">
+                        </div>
+                        <div class="control-group">
+                            <label>Manufacturer</label>
+                            <input type="text" id="meta-manufacturer" value="${names.manufacturer?.en || ''}" placeholder="e.g., Your Company">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="control-group">
+                            <label>Designer</label>
+                            <input type="text" id="meta-designer" value="${names.designer?.en || ''}" placeholder="e.g., John Doe">
+                        </div>
+                        <div class="control-group">
+                            <label>License</label>
+                            <input type="text" id="meta-license" value="${names.license?.en || ''}" placeholder="License information">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Copyright</label>
+                        <textarea id="meta-copyright" rows="2">${names.copyright?.en || ''}</textarea>
+                    </div>
+
+                    <div class="control-group">
+                        <label>Description</label>
+                        <textarea id="meta-description" rows="3">${names.description?.en || ''}</textarea>
+                    </div>
+
+                    <div class="save-options">
+                        <button class="btn" onclick="saveFont('ttf')">💾 Save as TTF</button>
+                        <button class="btn btn-secondary" onclick="saveFont('otf')">💾 Save as OTF</button>
+                    </div>
+
+                    <div id="save-message"></div>
+                </div>
+            `;
+
+            contentArea.innerHTML = html;
+        }
+
+        function renderWaterfall(text, style) {
+            const sizes = [8, 10, 12, 14, 16, 18, 24, 30, 36, 48, 60, 72, 96];
+            
+            let html = '<h2 style="color: #4ecdc4; margin-bottom: 20px;">Waterfall Display</h2><div class="waterfall">';
+
+            sizes.forEach(size => {
+                html += `
+                    <div class="waterfall-line" style="${style} font-size: ${size}px;">
+                        ${size}px - ${text}
+                    </div>
+                `;
+            });
+
+            html += '</div>';
+            contentArea.innerHTML = html;
+        }
+
+        function renderInfo() {
+            const metrics = currentFont.metrics || {};
+            
+            contentArea.innerHTML = `
+                <h2 style="color: #4ecdc4; margin-bottom: 20px;">Font Information</h2>
+                
+                <div class="info-grid">
+                    <div class="info-card">
+                        <div class="info-label">File Name</div>
+                        <div class="info-value">${currentFont.name}</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Font Family</div>
+                        <div class="info-value">${fontFamily}</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">File Size</div>
+                        <div class="info-value">${(currentFont.buffer.byteLength / 1024).toFixed(2)} KB</div>
+                    </div>
+                    <div class="info-card">
+                        <div class="info-label">Format</div>
+                        <div class="info-value">${currentFont.name.endsWith('.ttf') ? 'TrueType' : 'OpenType'}</div>
+                    </div>
+                </div>
+
+                <h3 style="color: #95e1d3; margin: 30px 0 15px 0;">Pangrams for Testing</h3>
+                <div class="sample-sizes">
+                    <div class="size-sample">
+                        <div class="size-label">English</div>
+                        <div style="font-family: '${fontFamily}', sans-serif; font-size: 24px;">
+                            The quick brown fox jumps over the lazy dog
+                        </div>
+                    </div>
+                    <div class="size-sample">
+                        <div class="size-label">With Numbers</div>
+                        <div style="font-family: '${fontFamily}', sans-serif; font-size: 24px;">
+                            The five boxing wizards jump quickly - 0123456789
+                        </div>
+                    </div>
+                    <div class="size-sample">
+                        <div class="size-label">Special Characters</div>
+                        <div style="font-family: '${fontFamily}', sans-serif; font-size: 24px;">
+                            !@#$%^&*()_+-=[]{}|;':",.<>?/~\`
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Test Samples Functions
+        window.updateSampleSize = function(index, value) {
+            testSamples[index].size = parseInt(value);
+            renderContent();
+        };
+
+        window.updateSampleText = function(index, value) {
+            testSamples[index].text = value;
+            renderContent();
+        };
+
+        window.addTestSample = function() {
+            testSamples.push({
+                text: 'New sample text',
+                size: 36
+            });
+            renderContent();
+        };
+
+        window.removeSample = function(index) {
+            testSamples.splice(index, 1);
+            renderContent();
+        };
+
+        // Save Font Function
+        window.saveFont = async function(format) {
+            const messageDiv = document.getElementById('save-message');
+            
+            if (!opentypeFont || typeof opentype === 'undefined') {
+                messageDiv.innerHTML = '<div class="error">OpenType.js not loaded or font not parsed properly</div>';
+                return;
+            }
+
+            try {
+                // Update metadata from form
+                const font = opentypeFont;
+                
+                // Ensure names object exists
+                if (!font.names) {
+                    font.names = {};
+                }
+                
+                font.names.fontFamily = { en: document.getElementById('meta-family').value };
+                font.names.fontSubfamily = { en: document.getElementById('meta-subfamily').value };
+                font.names.fullName = { en: document.getElementById('meta-fullname').value };
+                font.names.postScriptName = { en: document.getElementById('meta-postscript').value };
+                font.names.version = { en: document.getElementById('meta-version').value };
+                font.names.manufacturer = { en: document.getElementById('meta-manufacturer').value };
+                font.names.designer = { en: document.getElementById('meta-designer').value };
+                font.names.license = { en: document.getElementById('meta-license').value };
+                font.names.copyright = { en: document.getElementById('meta-copyright').value };
+                font.names.description = { en: document.getElementById('meta-description').value };
+
+                // Generate font buffer
+                const arrayBuffer = font.toArrayBuffer();
+                const blob = new Blob([arrayBuffer], { 
+                    type: format === 'ttf' ? 'font/ttf' : 'font/otf' 
+                });
+
+                // Create download link
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                
+                const familyName = document.getElementById('meta-family').value || 'CustomFont';
+                const subfamilyName = document.getElementById('meta-subfamily').value || 'Regular';
+                link.download = `${familyName}-${subfamilyName}.${format}`;
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                messageDiv.innerHTML = `<div class="success">✓ Font saved as ${format.toUpperCase()} successfully!</div>`;
+                
+                setTimeout(() => {
+                    messageDiv.innerHTML = '';
+                }, 3000);
+
+            } catch (err) {
+                messageDiv.innerHTML = `<div class="error">Error saving font: ${err.message}</div>`;
+            }
+        };
+
+        // Initial render
+        renderContent();
+    </script>
+</body>
+</html>
