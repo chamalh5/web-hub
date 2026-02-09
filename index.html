@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Professional Web Hub</title>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --secondary: #7c3aed;
+            --accent: #00d2ff;
+            --dark: #0f172a;
+            --darker: #0a0f1c;
+            --light: #f8fafc;
+            --glass: rgba(255, 255, 255, 0.08);
+            --glass-dark: rgba(0, 0, 0, 0.2);
+            --card-bg: rgba(30, 41, 59, 0.6);
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+            --shadow-light: 0 5px 15px rgba(0, 210, 255, 0.2);
+            --radius: 20px;
+        }
+        
+        /* Dark/Light Mode Variables */
+        .light-mode {
+            --dark: #f1f5f9;
+            --darker: #e2e8f0;
+            --light: #0f172a;
+            --glass: rgba(0, 0, 0, 0.05);
+            --glass-dark: rgba(255, 255, 255, 0.1);
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body, html {
+            height: 100%;
+            margin: 0;
+            font-family: 'Poppins', 'Segoe UI', sans-serif;
+            background: var(--darker);
+            color: var(--light);
+            overflow-x: hidden;
+            transition: var(--transition);
+        }
+        
+        .wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(135deg, var(--dark), #1e293b);
+        }
+        
+        .light-mode .wrapper {
+            background: linear-gradient(135deg, var(--darker), #cbd5e1);
+        }
+        
+        /* HEADER SECTION */
+        .header {
+            padding: 25px 15px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+        
+        .header h1 {
+            font-size: clamp(32px, 6vw, 48px);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin: 10px 0;
+            background: linear-gradient(to right, var(--accent), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            text-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .header p {
+            font-size: clamp(14px, 3vw, 18px);
+            opacity: 0.8;
+            max-width: 600px;
+            margin: 0 auto 20px;
+            font-weight: 300;
+        }
+        
+        /* CONTROLS BAR */
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .search-container {
+            flex: 1;
+            min-width: 250px;
+            max-width: 500px;
+            position: relative;
+        }
+        
+        .search-box {
+            width: 100%;
+            padding: 14px 20px 14px 50px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--glass-dark);
+            color: var(--light);
+            font-size: 16px;
+            font-family: 'Poppins', sans-serif;
+            transition: var(--transition);
+        }
+        
+        .light-mode .search-box {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(0, 210, 255, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--accent);
+            font-size: 18px;
+        }
+        
+        .controls-right {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+        
+        /* TOGGLE BUTTONS */
+        .toggle-btn, .filter-btn {
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--glass);
+            color: var(--light);
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        .toggle-btn:hover, .filter-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .light-mode .toggle-btn, .light-mode .filter-btn {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        /* MAIN GRID */
+        .grid-container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+            flex: 1;
+            width: 100%;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 20px;
+            padding: 10px;
+        }
+        
+        /* Mobile-first responsive grid */
+        @media (max-width: 480px) {
+            .grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 15px;
+                padding: 5px;
+            }
+        }
+        
+        @media (min-width: 481px) and (max-width: 768px) {
+            .grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 18px;
+            }
+        }
+        
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 20px;
+            }
+        }
+        
+        @media (min-width: 1025px) {
+            .grid {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 25px;
+            }
+        }
+        
+        /* APP CARDS */
+        .app-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(15px);
+            border-radius: var(--radius);
+            padding: 25px 15px;
+            text-align: center;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            aspect-ratio: 1/1;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .app-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(to right, var(--primary), var(--accent));
+            transition: var(--transition);
+            transform: translateY(-100%);
+        }
+        
+        .app-card:hover {
+            transform: translateY(-10px);
+            border-color: var(--accent);
+            box-shadow: var(--shadow-light);
+        }
+        
+        .app-card:hover::before {
+            transform: translateY(0);
+        }
+        
+        .light-mode .app-card {
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .app-icon {
+            font-size: 42px;
+            margin-bottom: 15px;
+            color: var(--accent);
+            transition: var(--transition);
+        }
+        
+        .app-card:hover .app-icon {
+            transform: scale(1.1);
+            color: var(--primary);
+        }
+        
+        .app-name {
+            font-weight: 600;
+            font-size: 16px;
+            line-height: 1.4;
+            margin-top: 5px;
+            transition: var(--transition);
+        }
+        
+        .app-card:hover .app-name {
+            color: var(--accent);
+        }
+        
+        .app-category {
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 5px;
+            font-weight: 400;
+        }
+        
+        /* Touch-friendly improvements */
+        @media (hover: none) {
+            .app-card:active {
+                transform: scale(0.98);
+                background: rgba(255, 255, 255, 0.1);
+            }
+        }
+        
+        /* VIEWER SECTION */
+        #viewer {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: white;
+            z-index: 1000;
+        }
+        
+        .nav-bar {
+            padding: 15px 20px;
+            background: var(--darker);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .light-mode .nav-bar {
+            background: #f8fafc;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .back-btn {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(37, 99, 235, 0.3);
+        }
+        
+        .back-btn:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.4);
+        }
+        
+        .viewer-title {
+            font-weight: 600;
+            font-size: 18px;
+            color: var(--light);
+        }
+        
+        .light-mode .viewer-title {
+            color: var(--dark);
+        }
+        
+        iframe {
+            width: 100%;
+            height: calc(100vh - 70px);
+            border: none;
+            display: block;
+        }
+        
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 25px 15px;
+            opacity: 0.7;
+            font-size: 14px;
+            margin-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .light-mode footer {
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        footer a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        /* FILTER CATEGORIES */
+        .filter-categories {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0 30px;
+            flex-wrap: wrap;
+        }
+        
+        .category-btn {
+            padding: 8px 18px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: var(--glass);
+            color: var(--light);
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--transition);
+        }
+        
+        .category-btn.active, .category-btn:hover {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+        
+        /* NO RESULTS */
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            display: none;
+        }
+        
+        .no-results i {
+            font-size: 60px;
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+        
+        /* UTILITY CLASSES */
+        .hidden {
+            display: none !important;
+        }
+        
+        * {
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</head>
+<body>
+    <div class="wrapper" id="home-screen">
+        <div class="header">
+            <div class="header-content">
+                <h1>HC WEB HUB</h1>
+                <p>Professional tools for developers and designers</p>
+            </div>
+        </div>
+        
+        <div class="controls-bar">
+            <div class="search-container">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-box" id="searchInput" placeholder="Search tools and apps...">
+            </div>
+            
+            <div class="controls-right">
+                <button class="filter-btn" id="filterBtn">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+                <button class="toggle-btn" id="themeToggle">
+                    <i class="fas fa-moon"></i> Dark Mode
+                </button>
+            </div>
+        </div>
+        
+        <div class="filter-categories" id="filterCategories">
+            <button class="category-btn active" data-category="all">All Apps</button>
+            <button class="category-btn" data-category="editor">Editors</button>
+            <button class="category-btn" data-category="font">Font Tools</button>
+            <button class="category-btn" data-category="converter">Converters</button>
+            <button class="category-btn" data-category="utility">Utilities</button>
+        </div>
+        
+        <div class="grid-container">
+            <div class="grid" id="appGrid">
+                <!-- App cards will be generated by JavaScript -->
+            </div>
+            
+            <div class="no-results" id="noResults">
+                <i class="fas fa-search"></i>
+                <h3>No results found</h3>
+                <p>Try searching with different keywords</p>
+            </div>
+        </div>
+        
+        <footer>
+            <p>&copy; 2024 HC Graphics | Professional Web Hub</p>
+            <p>Made with <i class="fas fa-heart" style="color:#ff4757;"></i> for developers</p>
+        </footer>
+    </div>
+    
+    <div id="viewer">
+        <div class="nav-bar">
+            <button class="back-btn" onclick="closeApp()">
+                <i class="fas fa-arrow-left"></i> BACK TO HUB
+            </button>
+            <div class="viewer-title" id="viewerTitle">App Viewer</div>
+        </div>
+        <iframe id="frame"></iframe>
+    </div>
+    
+    <script>
+        // App data with categories and FontAwesome icons
+        const apps = [
+            { id: 1, name: "HTML Editor", path: "projects/Html Editor.html", icon: "fas fa-code", category: "editor", color: "#00d2ff" },
+            { id: 2, name: "Font Editor Pro", path: "projects/font editor pro v7 work ofline.html", icon: "fas fa-font", category: "font", color: "#7c3aed" },
+            { id: 3, name: "Full Font Handler", path: "projects/Full font handler my .html", icon: "fas fa-text-height", category: "font", color: "#10b981" },
+            { id: 4, name: "Font to SVG", path: "projects/font to svg 2 vector.html", icon: "fas fa-shapes", category: "converter", color: "#f59e0b" },
+            { id: 5, name: "SRT Editor", path: "projects/srt_editor only.html", icon: "fas fa-closed-captioning", category: "editor", color: "#ef4444" },
+            { id: 6, name: "Handwriting to Font", path: "projects/Hand writing to font .html", icon: "fas fa-pen-fancy", category: "font", color: "#8b5cf6" },
+            { id: 7, name: "Font Compare with Image", path: "projects/font view 431.html", icon: "fas fa-images", category: "font", color: "#06b6d4" },
+            { id: 8, name: "Font Viewer", path: "projects/font_viewer with all.html", icon: "fas fa-eye", category: "font", color: "#84cc16" },
+            { id: 9, name: "Markdown to Doc", path: "projects/markdown_converter docs.html", icon: "fas fa-file-alt", category: "converter", color: "#f97316" },
+            { id: 10, name: "Teleoperate Script", path: "projects/my teliport script.html", icon: "fas fa-terminal", category: "utility", color: "#6366f1" },
+            { id: 11, name: "New Font to SVG", path: "projects/new font to svg.html", icon: "fas fa-vector-square", category: "converter", color: "#ec4899" }
+        ];
+        
+        // DOM Elements
+        const appGrid = document.getElementById('appGrid');
+        const searchInput = document.getElementById('searchInput');
+        const filterCategories = document.getElementById('filterCategories');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const noResults = document.getElementById('noResults');
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = themeToggle.querySelector('i');
+        const filterBtn = document.getElementById('filterBtn');
+        
+        // Initialize
+        function init() {
+            renderApps(apps);
+            setupEventListeners();
+            checkInitialTheme();
+        }
+        
+        // Render apps to grid
+        function renderApps(appsToRender) {
+            appGrid.innerHTML = '';
+            
+            if (appsToRender.length === 0) {
+                noResults.style.display = 'block';
+                return;
+            }
+            
+            noResults.style.display = 'none';
+            
+            appsToRender.forEach(app => {
+                const card = document.createElement('div');
+                card.className = 'app-card';
+                card.dataset.category = app.category;
+                card.onclick = () => openApp(app.path, app.name);
+                
+                card.innerHTML = `
+                    <i class="${app.icon} app-icon" style="color:${app.color};"></i>
+                    <div class="app-name">${app.name}</div>
+                    <div class="app-category">${app.category.charAt(0).toUpperCase() + app.category.slice(1)}</div>
+                `;
+                
+                appGrid.appendChild(card);
+            });
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Search functionality
+            searchInput.addEventListener('input', filterApps);
+            
+            // Category filter
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Update active button
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    filterApps();
+                });
+            });
+            
+            // Theme toggle
+            themeToggle.addEventListener('click', toggleTheme);
+            
+            // Filter button
+            filterBtn.addEventListener('click', function() {
+                filterCategories.classList.toggle('hidden');
+            });
+            
+            // Close filter on click outside (for mobile)
+            document.addEventListener('click', function(e) {
+                if (!filterBtn.contains(e.target) && !filterCategories.contains(e.target)) {
+                    if (window.innerWidth <= 768) {
+                        filterCategories.classList.add('hidden');
+                    }
+                }
+            });
+        }
+        
+        // Filter apps based on search and category
+        function filterApps() {
+            const searchTerm = searchInput.value.toLowerCase();
+            const activeCategory = document.querySelector('.category-btn.active').dataset.category;
+            
+            let filteredApps = apps;
+            
+            // Filter by category
+            if (activeCategory !== 'all') {
+                filteredApps = filteredApps.filter(app => app.category === activeCategory);
+            }
+            
+            // Filter by search term
+            if (searchTerm) {
+                filteredApps = filteredApps.filter(app => 
+                    app.name.toLowerCase().includes(searchTerm) || 
+                    app.category.toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            renderApps(filteredApps);
+        }
+        
+        // Theme functionality
+        function checkInitialTheme() {
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const savedTheme = localStorage.getItem('theme');
+            
+            if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
+                enableLightMode();
+            }
+        }
+        
+        function toggleTheme() {
+            if (document.body.classList.contains('light-mode')) {
+                disableLightMode();
+            } else {
+                enableLightMode();
+            }
+        }
+        
+        function enableLightMode() {
+            document.body.classList.add('light-mode');
+            themeIcon.className = 'fas fa-sun';
+            themeToggle.innerHTML = '<i class="fas fa-sun"></i> Light Mode';
+            localStorage.setItem('theme', 'light');
+        }
+        
+        function disableLightMode() {
+            document.body.classList.remove('light-mode');
+            themeIcon.className = 'fas fa-moon';
+            themeToggle.innerHTML = '<i class="fas fa-moon"></i> Dark Mode';
+            localStorage.setItem('theme', 'dark');
+        }
+        
+        // App viewer functions
+        function openApp(url, name) {
+            document.getElementById('home-screen').style.display = 'none';
+            document.getElementById('viewer').style.display = 'block';
+            document.getElementById('frame').src = url;
+            document.getElementById('viewerTitle').textContent = name;
+            document.body.style.overflow = 'hidden';
+            
+            // Push to history for back button support
+            history.pushState({ viewer: true }, '');
+        }
+        
+        function closeApp() {
+            document.getElementById('home-screen').style.display = 'flex';
+            document.getElementById('viewer').style.display = 'none';
+            document.getElementById('frame').src = '';
+            document.body.style.overflow = 'auto';
+        }
+        
+        // Handle browser back button
+        window.addEventListener('popstate', function(event) {
+            closeApp();
+        });
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
