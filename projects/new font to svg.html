@@ -42,7 +42,7 @@
 
     <div class="control-panel">
         <h2>Font Character Exporter</h2>
-        <p>පරිගණකයේ ඇති ෆොන්ට් එකක් (.ttf/.otf) ලබා දෙන්න. එවිට සියලුම අකුරු ස්වයංක්‍රීයව පහත දිස්වේ.</p>
+        <p>Upload a font file (.ttf/.otf) . All letters will be display here.</p>
         
         <label class="upload-label" for="fontUpload">Upload & Preview Font</label>
         <input type="file" id="fontUpload" accept=".ttf, .otf" onchange="loadFont(event)">
@@ -126,7 +126,7 @@
         }
 
         function openEditor(char) {
-            if (!customFontName) return alert("පළමුව ෆොන්ට් එකක් Upload කරන්න!");
+            if (!customFontName) return alert("Please Upload a font!");
             currentLetter = char;
             document.getElementById('edit-title').innerText = "Modify: " + char;
             document.getElementById('overlay').style.display = 'flex';
@@ -169,7 +169,7 @@
                     count++;
                 }
             }
-            if(count === 0) return alert("Export කිරීමට අකුරු නැත!");
+            if(count === 0) return alert("No letters to export!");
             saveAs(await zip.generateAsync({type: "blob"}), "font_characters_svg.zip");
         }
     </script>
