@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>JIBA Creative · Premium Font Viewer</title>
+  <style>
+    :root {
+      --bg-primary: #f0f0f0;
+      --bg-secondary: #fff;
+      --text-primary: #000;
+      --text-secondary: #333;
+      --border-color: #ccc;
+      --button-bg: #4a90e2;
+      --button-text: white;
+      --accent-color: #2c5aa0;
+      --footer-bg: #e9ecef;
+      --card-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #2d2d2d;
+      --text-primary: #e0e0e0;
+      --text-secondary: #b0b0b0;
+      --border-color: #555;
+      --button-bg: #4a90e2;
+      --button-text: white;
+      --accent-color: #6bb6ff;
+      --footer-bg: #222;
+    }
+
+    [data-theme="navy"] {
+      --bg-primary: #0f1419;
+      --bg-secondary: #1e2a3a;
+      --text-primary: #f0f6ff;
+      --text-secondary: #a8c8ec;
+      --border-color: #34495e;
+      --button-bg: #2c3e50;
+      --button-text: #ecf0f1;
+      --accent-color: #3498db;
+      --footer-bg: #0a1017;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 20px 24px 0 24px;
+      transition: background 0.25s ease, color 0.2s ease;
+      line-height: 1.5;
+    }
+
+    .app-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    /* header brand area */
+    .brand-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 24px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--border-color);
+    }
+
+    .branding {
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .studio-name-link {
+      font-size: 1.8rem;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent-color), #b980ea);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: transparent;
+      letter-spacing: -0.3px;
+      text-decoration: none;
+      transition: opacity 0.2s;
+      cursor: pointer;
+    }
+
+    .studio-name-link:hover {
+      opacity: 0.8;
+      text-decoration: underline;
+    }
+
+    .brand-tag {
+      font-size: 0.9rem;
+      background: var(--accent-color);
+      color: white;
+      padding: 4px 12px;
+      border-radius: 40px;
+      font-weight: 500;
+      opacity: 0.9;
+      cursor: default;
+    }
+
+    /* theme switcher */
+    .theme-switcher {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--bg-secondary);
+      padding: 6px 14px;
+      border-radius: 48px;
+      border: 1px solid var(--border-color);
+    }
+
+    .theme-option {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      padding: 5px 12px;
+      border-radius: 32px;
+      transition: all 0.2s;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .theme-option.active {
+      background: var(--accent-color);
+      color: white;
+      transform: scale(1.02);
+    }
+
+    /* cards */
+    .file-section, .preview-section {
+      background: var(--bg-secondary);
+      border-radius: 24px;
+      padding: 1.5rem;
+      margin-bottom: 1.8rem;
+      border: 1px solid var(--border-color);
+      box-shadow: var(--card-shadow);
+    }
+
+    .font-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin-top: 20px;
+    }
+
+    .info-card {
+      background: var(--bg-primary);
+      padding: 14px 18px;
+      border-radius: 20px;
+      border-left: 4px solid var(--accent-color);
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: var(--accent-color);
+      font-size: 14px;
+      margin-bottom: 5px;
+    }
+
+    .info-value {
+      font-family: monospace;
+      font-size: 16px;
+      word-break: break-all;
+    }
+
+    .preview-display {
+      background: var(--bg-primary);
+      border-radius: 20px;
+      padding: 28px 24px;
+      min-height: 240px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 24px;
+      line-height: 1.4;
+      transition: all 0.1s;
+      border: 1px solid var(--border-color);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      background: var(--button-bg);
+      padding: 12px 28px;
+      border-radius: 60px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .file-input-wrapper:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.03);
+    }
+
+    input[type="file"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .sample-btn, .controls button {
+      background: var(--border-color);
+      border: none;
+      padding: 10px 18px;
+      border-radius: 40px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: 0.2s;
+      color: var(--text-primary);
+    }
+
+    .sample-btn:hover, .controls button:hover {
+      background: var(--accent-color);
+      color: white;
+      transform: translateY(-1px);
+    }
+
+    .controls {
+      display: flex;
+      gap: 18px;
+      margin-top: 8px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .text-input {
+      width: 100%;
+      padding: 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      resize: vertical;
+      font-family: inherit;
+      box-sizing: border-box;
+    }
+
+    .size-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin: 16px 0;
+    }
+
+    .size-control {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .size-slider {
+      width: 150px;
+    }
+
+    .size-input {
+      width: 70px;
+      padding: 6px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      text-align: center;
+    }
+
+    /* footer support & contact - using your exact form */
+    .footer-support {
+      margin-top: 40px;
+      background: var(--footer-bg);
+      border-radius: 32px;
+      border: 1px solid var(--border-color);
+      padding: 2rem 2rem 1.8rem;
+    }
+
+    .footer-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 40px;
+      justify-content: space-between;
+    }
+
+    .support-coffee {
+      flex: 1.2;
+      min-width: 220px;
+    }
+
+    .contact-form-area {
+      flex: 2;
+      min-width: 280px;
+    }
+
+    .coffee-card {
+      background: rgba(0,0,0,0.03);
+      border-radius: 28px;
+      padding: 20px;
+      text-align: center;
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-coffee {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      background: #FFDD88;
+      color: #3b2a1f;
+      padding: 12px 24px;
+      border-radius: 60px;
+      font-weight: 700;
+      text-decoration: none;
+      margin: 16px 0 12px;
+      transition: 0.2s;
+    }
+
+    .btn-coffee:hover {
+      transform: scale(1.02);
+      background: #ffd966;
+    }
+
+    /* EXACT form styling as requested */
+    .footer-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .footer-form input,
+    .footer-form textarea {
+      padding: 12px 16px;
+      background: var(--bg-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 60px;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .footer-form textarea {
+      border-radius: 24px;
+      resize: vertical;
+    }
+
+    .footer-form input:focus,
+    .footer-form textarea:focus {
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 2px rgba(74,144,226,0.2);
+    }
+
+    .submit-btn {
+      background: var(--accent-color);
+      color: white;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 60px;
+      font-weight: 600;
+      cursor: pointer;
+      width: fit-content;
+      transition: 0.2s;
+    }
+
+    .submit-btn:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .copyright {
+      text-align: center;
+      margin-top: 32px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 780px) {
+      body { padding: 16px; }
+      .brand-header { flex-direction: column; align-items: flex-start; }
+      .footer-grid { flex-direction: column; }
+      .size-control { flex-wrap: wrap; }
+      .submit-btn { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body data-theme="light">
+<div class="app-container">
+  
+  <!-- Header: JIBA Creative is a CLICKABLE LINK to your portfolio -->
+  <div class="brand-header">
+    <div class="branding">
+      <a href="https://chamalh5.github.io/JIBAcreative/" target="_blank" class="studio-name-link">JIBA Creative</a>
+      <span class="brand-tag">Premium quality font designer</span>
+    </div>
+    <div class="theme-switcher">
+      <div class="theme-option active" data-theme="light" onclick="setTheme('light')">☀️ Light</div>
+      <div class="theme-option" data-theme="dark" onclick="setTheme('dark')">🌙 Dark</div>
+      <div class="theme-option" data-theme="navy" onclick="setTheme('navy')">⚓ Navy</div>
+    </div>
+  </div>
+
+  <!-- Font Loader -->
+  <div class="file-section">
+    <div class="file-input-wrapper">
+      <input type="file" id="fontInput" accept=".ttf,.otf,.woff,.woff2">
+      📂 Load Font (TTF/OTF/WOFF)
+    </div>
+    <div class="font-info hidden" id="fontInfo">
+      <div class="info-card"><div class="info-label">Font Name</div><div class="info-value" id="fontName">-</div></div>
+      <div class="info-card"><div class="info-label">Font Family</div><div class="info-value" id="fontFamily">-</div></div>
+      <div class="info-card"><div class="info-label">File Name</div><div class="info-value" id="fileName">-</div></div>
+      <div class="info-card"><div class="info-label">File Size</div><div class="info-value" id="fileSize">-</div></div>
+    </div>
+  </div>
+
+  <!-- Preview Section -->
+  <div class="preview-section hidden" id="previewSection">
+    <h3 style="margin:0 0 12px 0; color:var(--accent-color);">✨ Font Reality Check</h3>
+    <div class="text-input-section">
+      <textarea class="text-input" id="customText" rows="3" placeholder="Type anything… or use samples below.">The quick brown fox jumps over the lazy dog
+ABCDEFGHIJKLMNOPQRSTUVWXYZ
+abcdefghijklmnopqrstuvwxyz
+1234567890 !@#$%^&*()</textarea>
+    </div>
+    <div class="sample-texts" style="display:flex; gap:10px; flex-wrap:wrap; margin:12px 0;">
+      <button class="sample-btn" onclick="setSampleText('pangram')">Pangram</button>
+      <button class="sample-btn" onclick="setSampleText('alphabet')">Alphabet</button>
+      <button class="sample-btn" onclick="setSampleText('numbers')">Numbers</button>
+      <button class="sample-btn" onclick="setSampleText('lorem')">Lorem Ipsum</button>
+      <button class="sample-btn" onclick="setSampleText('special')">Special Chars</button>
+    </div>
+    <div class="size-controls">
+      <div class="size-control">
+        <label>Font Size:</label>
+        <input type="range" class="size-slider" id="fontSizeSlider" min="8" max="120" value="24" oninput="updateFontSize(this.value)">
+        <input type="number" class="size-input" id="fontSizeInput" min="8" max="200" value="24" onchange="updateFontSize(this.value)">
+        <span>px</span>
+      </div>
+      <div class="size-control">
+        <label>Line Height:</label>
+        <input type="range" class="size-slider" id="lineHeightSlider" min="0.8" max="3" step="0.1" value="1.4" oninput="updateLineHeight(this.value)">
+        <input type="number" class="size-input" id="lineHeightInput" min="0.5" max="5" step="0.1" value="1.4" onchange="updateLineHeight(this.value)">
+      </div>
+    </div>
+    <div class="preview-display" id="previewDisplay">Upload a font to preview magic ✨</div>
+  </div>
+
+  <div class="controls">
+    <button id="downloadBtn" onclick="downloadFontInfo()" disabled>📄 Download Font Info</button>
+    <button onclick="copyPreviewText()">📋 Copy Preview Text</button>
+  </div>
+
+  <!-- ========== FOOTER: Support My Work + Get in Touch (with your exact form) ========= -->
+  <div class="footer-support">
+    <div class="footer-grid">
+      <!-- Left Support Coffee Section -->
+      <div class="support-coffee">
+        <div class="coffee-card">
+          <div style="font-size:2.2rem;">☕✨</div>
+          <h3 style="margin: 8px 0 4px;">Love my fonts & graphics?</h3>
+          <p style="font-size:0.9rem;">Feel free to support me with a coffee!<br>Every sip fuels new typefaces.</p>
+          <a href="https://buymeacoffee.com/hcgraphics" target="_blank" rel="noopener noreferrer" class="btn-coffee">❤️ Buy Me a Coffee</a>
+          <p style="font-size:0.75rem; margin-top:6px;">Your support keeps creativity flowing</p>
+        </div>
+      </div>
+
+      <!-- Right: Get in Touch - YOUR EXACT FORM -->
+      <div class="contact-form-area">
+        <h3 style="margin:0 0 16px 0;">📬 Get in Touch</h3>
+       <form class="footer-form" id="contactForm" onsubmit="sendToGmail(event)">
+    <input type="text" id="userName" placeholder="Your Name" required>
+    <input type="email" id="userEmail" placeholder="Your Email" required>
+    <textarea id="userMessage" rows="5" placeholder="Your Message or Custom Font Request" required></textarea>
+    <button type="submit" class="submit-btn">SEND MESSAGE</button>
+</form>
+        <div style="margin-top: 20px; font-size:0.85rem; background:rgba(0,0,0,0.05); border-radius: 32px; padding: 8px 14px; text-align:center;">
+          ✨ Need a custom font? We craft exclusive letterforms.
+        </div>
+      </div>
+    </div>
+    <div class="copyright">
+      © 2026 JIBA Creative & HC Graphics Studio. All Rights Reserved.<br>
+      contact - <a href="https://mail.google.com/mail/?view=cm&fs=1&to=harithadharmasiri@gmail.com&su=Service%20Request&body=I%20need%20more%20details%20about%20your%20service." 
+   target="_blank" 
+   style="color:var(--accent-color);">me here</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ---------- FONT CORE (all original functionality preserved) ----------
+  let currentFont = null;
+  let currentFontName = '';
+
+  function setTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
+    document.querySelector(`.theme-option[data-theme="${theme}"]`).classList.add('active');
+    try { localStorage.setItem('preferred-theme', theme); } catch(e) {}
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    try { const saved = localStorage.getItem('preferred-theme') || 'light'; setTheme(saved); } catch(e) { setTheme('light'); }
+  });
+
+  document.getElementById('fontInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const ext = '.' + file.name.split('.').pop().toLowerCase();
+    if (!['.ttf','.otf','.woff','.woff2'].includes(ext)) {
+      alert('Please upload a valid font (TTF, OTF, WOFF, WOFF2)');
+      return;
+    }
+    loadFont(file);
+  });
+
+  async function loadFont(file) {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const fontFace = new FontFace('CustomFont', arrayBuffer);
+      await fontFace.load();
+      document.fonts.add(fontFace);
+      currentFont = fontFace;
+      currentFontName = file.name.split('.')[0];
+      updateFontInfo(file, fontFace);
+      document.getElementById('fontInfo').classList.remove('hidden');
+      document.getElementById('previewSection').classList.remove('hidden');
+      document.getElementById('downloadBtn').disabled = false;
+      updatePreview();
+    } catch(err) {
+      console.error(err);
+      alert('Error loading font. File might be corrupted or unsupported.');
+    }
+  }
+
+  function updateFontInfo(file, fontFace) {
+    document.getElementById('fontName').innerText = fontFace.family || 'Custom Font';
+    document.getElementById('fontFamily').innerText = fontFace.family || 'Custom Typeface';
+    document.getElementById('fileName').innerText = file.name;
+    document.getElementById('fileSize').innerText = formatFileSize(file.size);
+  }
+
+  function formatFileSize(bytes) {
+    if(bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes','KB','MB','GB'];
+    const i = Math.floor(Math.log(bytes)/Math.log(k));
+    return parseFloat((bytes / Math.pow(k,i)).toFixed(2)) + ' ' + sizes[i];
+  }
+
+  function updatePreview() {
+    const previewDiv = document.getElementById('previewDisplay');
+    const customText = document.getElementById('customText').value || 'Upload a font to see the preview here...';
+    previewDiv.innerText = customText;
+    previewDiv.style.fontFamily = currentFont ? 'CustomFont, system-ui, sans-serif' : 'system-ui, sans-serif';
+  }
+
+  function updateFontSize(val) {
+    document.getElementById('fontSizeSlider').value = val;
+    document.getElementById('fontSizeInput').value = val;
+    document.getElementById('previewDisplay').style.fontSize = val + 'px';
+  }
+  
+  function updateLineHeight(val) {
+    document.getElementById('lineHeightSlider').value = val;
+    document.getElementById('lineHeightInput').value = val;
+    document.getElementById('previewDisplay').style.lineHeight = val;
+  }
+
+  function setSampleText(type) {
+    const ta = document.getElementById('customText');
+    const samples = {
+      pangram: 'The quick brown fox jumps over the lazy dog.\nPack my box with five dozen liquor jugs.',
+      alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz',
+      numbers: '1234567890\n½ ¼ ¾ ⅓ ⅔ ⅕ ⅖ ⅗ ⅘ ⅙ ⅚',
+      lorem: 'Lorem ipsum odor amet, consectetuer adipiscing elit. Augue mus litora fames habitant rhoncus.',
+      special: '!@#$%^&*()_+-=[]{}|;:,.<>?\n"\'`~€£¥¢∞§¶•ªº–≠'
+    };
+    ta.value = samples[type] || samples.pangram;
+    updatePreview();
+  }
+
+  function downloadFontInfo() {
+    if (!currentFont) { alert('No font loaded!'); return; }
+    const content = `Font Information Report
+========================
+File Name: ${document.getElementById('fileName').innerText}
+Font Name: ${document.getElementById('fontName').innerText}
+Font Family: ${document.getElementById('fontFamily').innerText}
+File Size: ${document.getElementById('fileSize').innerText}
+Font Size: ${document.getElementById('fontSizeInput').value}px
+Line Height: ${document.getElementById('lineHeightInput').value}
+Preview Text:
+${document.getElementById('customText').value}
+Generated: ${new Date().toLocaleString()}
+--- JIBA Creative & HC Graphics Studio ---`;
+    const blob = new Blob([content], {type: 'text/plain'});
+    const link = document.createElement('a');
+    link.download = `${currentFontName || 'font'}_info.txt`;
+    link.href = URL.createObjectURL(blob);
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  function copyPreviewText() {
+    const text = document.getElementById('customText').value;
+    if(!text) { alert('Nothing to copy'); return; }
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = event.target;
+      const original = btn.innerHTML;
+      btn.innerHTML = '✅ Copied!';
+      setTimeout(() => btn.innerHTML = original, 1800);
+    }).catch(() => alert('Copy failed'));
+  }
+
+  document.getElementById('customText').addEventListener('input', updatePreview);
+  
+  document.addEventListener('keydown', (e) => {
+    if(e.ctrlKey && e.key === 's') {
+      e.preventDefault();
+      if(!document.getElementById('downloadBtn').disabled) downloadFontInfo();
+    }
+  });
+
+  // The form uses native mailto: action - no extra JS needed, it works as standard HTML form
+  // But we add a small visual feedback when form is submitted
+  const contactForm = document.getElementById('contactForm');
+  if (contactForm) {
+    contactForm.addEventListener('submit', function(e) {
+      // Native mailto will open email client, we just show a quick notification
+      setTimeout(() => {
+        alert("📧 Thank you! Your email client will open to send your message to harithadharmasiri@gmail.com");
+      }, 10);
+    });
+  }
+
+  // Initialize preview
+  updatePreview();
+  document.getElementById('previewDisplay').style.fontSize = '24px';
+  document.getElementById('previewDisplay').style.lineHeight = '1.4';
+
+
+function sendToGmail(event) {
+    event.preventDefault(); // Form එක reload වීම වළක්වයි
+
+    const name = document.getElementById('userName').value;
+    const email = document.getElementById('userEmail').value;
+    const message = document.getElementById('userMessage').value;
+
+    const subject = encodeURIComponent("Contact Form: " + name);
+    const body = encodeURIComponent("Name: " + name + "\nEmail: " + email + "\n\nMessage:\n" + message);
+
+    // Gmail Compose ලින්ක් එක සාදයි
+    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=harithadharmasiri@gmail.com&su=${subject}&body=${body}`;
+
+    // අලුත් ටැබ් එකක විවෘත කරයි
+    window.open(gmailUrl, '_blank');
+}
+</script>
+</body>
+</html>

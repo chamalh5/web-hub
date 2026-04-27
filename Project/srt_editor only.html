@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SRT Subtitle Editor</title>
+  <style>
+    :root {
+      --bg-primary: #f0f0f0;
+      --bg-secondary: #fff;
+      --text-primary: #000;
+      --text-secondary: #333;
+      --border-color: #ccc;
+      --button-bg: #4a90e2;
+      --button-text: white;
+      --accent-color: #2c5aa0;
+    }
+
+    [data-theme="dark"] {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #2d2d2d;
+      --text-primary: #e0e0e0;
+      --text-secondary: #b0b0b0;
+      --border-color: #555;
+      --button-bg: #4a90e2;
+      --button-text: white;
+      --accent-color: #6bb6ff;
+    }
+
+    [data-theme="navy"] {
+      --bg-primary: #0f1419;
+      --bg-secondary: #1e2a3a;
+      --text-primary: #f0f6ff;
+      --text-secondary: #a8c8ec;
+      --border-color: #34495e;
+      --button-bg: #2c3e50;
+      --button-text: #ecf0f1;
+      --accent-color: #3498db;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      padding: 20px;
+      transition: all 0.3s ease;
+      margin: 0;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .theme-switcher {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      background: var(--bg-secondary);
+      padding: 8px 12px;
+      border-radius: 25px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .theme-option {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 20px;
+      transition: all 0.3s ease;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .theme-option.active {
+      background: var(--accent-color);
+      color: white;
+      transform: scale(1.05);
+    }
+
+    .theme-option:hover:not(.active) {
+      background: var(--border-color);
+      transform: translateY(-1px);
+    }
+
+    .theme-icon {
+      width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .file-section {
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .file-input-wrapper {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      background: var(--button-bg);
+      color: var(--button-text);
+      padding: 12px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      transition: all 0.3s ease;
+      border: none;
+    }
+
+    .file-input-wrapper:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    input[type="file"] {
+      position: absolute;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    .font-controls {
+      background: var(--bg-secondary);
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    }
+
+    .font-controls h3 {
+      margin: 0 0 10px 0;
+      color: var(--accent-color);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .font-options {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      align-items: end;
+    }
+
+    .font-control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .font-control-group label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .font-control-group select,
+    .font-control-group input[type="range"] {
+      padding: 6px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-size: 12px;
+    }
+
+    .range-display {
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .editor-container {
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .editor-container h3 {
+      margin: 0 0 15px 0;
+      color: var(--accent-color);
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    textarea {
+      width: 100%;
+      height: 500px;
+      font-size: 16px;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      resize: vertical;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--editor-font, 'Consolas', 'Monaco', monospace);
+      line-height: var(--editor-line-height, 1.5);
+      transition: all 0.3s ease;
+      box-sizing: border-box;
+      white-space: pre-wrap;
+      word-wrap: break-word;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent-color);
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    }
+
+    .controls {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    .controls button {
+      padding: 12px 24px;
+      font-size: 16px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: var(--button-bg);
+      color: var(--button-text);
+      font-weight: 600;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .controls button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .controls button:active {
+      transform: translateY(0);
+    }
+
+    .save-options {
+      background: var(--bg-secondary);
+      padding: 20px;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .save-options h3 {
+      margin: 0 0 15px 0;
+      color: var(--accent-color);
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .save-buttons {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .save-buttons button {
+      padding: 12px 24px;
+      font-size: 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #27ae60;
+      color: white;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .save-buttons button:hover {
+      background: #219a52;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    .file-name-display {
+      margin-top: 15px;
+      padding: 10px 15px;
+      background: var(--bg-primary);
+      border-radius: 6px;
+      border: 1px solid var(--border-color);
+      font-family: monospace;
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      
+      .theme-switcher {
+        justify-content: center;
+      }
+      
+      .controls, .save-buttons {
+        flex-direction: column;
+      }
+      
+      .controls button, .save-buttons button {
+        width: 100%;
+      }
+
+      .font-options {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body data-theme="light">
+
+  <div class="header">
+    <h2>🎬 SRT Subtitle Editor</h2>
+    <div class="theme-switcher">
+      <div class="theme-option active" data-theme="light" onclick="setTheme('light')">
+        <div class="theme-icon">☀️</div>
+        <span>Light</span>
+      </div>
+      <div class="theme-option" data-theme="dark" onclick="setTheme('dark')">
+        <div class="theme-icon">🌙</div>
+        <span>Dark</span>
+      </div>
+      <div class="theme-option" data-theme="navy" onclick="setTheme('navy')">
+        <div class="theme-icon">⚓</div>
+        <span>Navy</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="file-section">
+    <div class="file-input-wrapper">
+      <input type="file" id="fileInput" accept=".srt,.txt">
+      📁 Choose SRT File
+    </div>
+    <div class="file-name-display">
+      <strong>Selected File:</strong> <span id="fileName">None</span>
+    </div>
+  </div>
+
+  <div class="font-controls">
+    <h3>🎨 Font Settings</h3>
+    <div class="font-options">
+      <div class="font-control-group">
+        <label>Font Family</label>
+        <select id="fontFamily" onchange="updateFont()">
+          <option value="'Consolas', 'Monaco', monospace">Consolas</option>
+          <option value="'Courier New', monospace">Courier New</option>
+          <option value="'Segoe UI', Arial, sans-serif">Segoe UI</option>
+          <option value="'Arial', sans-serif">Arial</option>
+          <option value="'Noto Sans Sinhala', sans-serif">Noto Sinhala</option>
+        </select>
+      </div>
+      <div class="font-control-group">
+        <label>Size</label>
+        <input type="range" id="fontSize" min="12" max="20" value="16" onchange="updateFont()">
+        <div class="range-display" id="fontSizeValue">16px</div>
+      </div>
+      <div class="font-control-group">
+        <label>Line Height</label>
+        <input type="range" id="lineHeight" min="1" max="2" step="0.1" value="1.5" onchange="updateFont()">
+        <div class="range-display" id="lineHeightValue">1.5</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="editor-container">
+    <h3>✏️ SRT Content Editor</h3>
+    <textarea id="srtContent" placeholder="Upload an SRT file or start typing your subtitle content here...
+
+Example SRT format:
+1
+00:00:01,000 --> 00:00:04,000
+This is the first subtitle line.
+
+2
+00:00:05,000 --> 00:00:08,000
+This is the second subtitle line."></textarea>
+  </div>
+
+  <div class="controls">
+    <button onclick="clearAll()">🗑️ Clear All</button>
+  </div>
+
+  <div class="save-options">
+    <h3>💾 Save Options</h3>
+    <div class="save-buttons">
+      <button onclick="saveFile('srt')">📄 Save as .srt</button>
+      <button onclick="saveFile('txt')">📝 Save as .txt</button>
+      <button onclick="copyToClipboard()">📋 Copy to Clipboard</button>
+    </div>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const fileNameDisplay = document.getElementById('fileName');
+    const srtContent = document.getElementById('srtContent');
+
+    let originalFileName = '';
+
+    // Theme management
+    function setTheme(theme) {
+      document.body.setAttribute('data-theme', theme);
+      
+      // Update active theme option
+      document.querySelectorAll('.theme-option').forEach(option => {
+        option.classList.remove('active');
+      });
+      document.querySelector(`[data-theme="${theme}"]`).classList.add('active');
+      
+      // Save theme preference (using in-memory storage only)
+      window.preferredTheme = theme;
+    }
+
+    // Load saved theme on page load
+    document.addEventListener('DOMContentLoaded', function() {
+      const savedTheme = window.preferredTheme || 'light';
+      setTheme(savedTheme);
+      updateFont();
+    });
+
+    // Font management
+    function updateFont() {
+      const fontFamily = document.getElementById('fontFamily').value;
+      const fontSize = document.getElementById('fontSize').value;
+      const lineHeight = document.getElementById('lineHeight').value;
+      
+      document.documentElement.style.setProperty('--editor-font', fontFamily);
+      document.documentElement.style.setProperty('--editor-line-height', lineHeight);
+      
+      srtContent.style.fontSize = fontSize + 'px';
+      
+      document.getElementById('fontSizeValue').textContent = fontSize + 'px';
+      document.getElementById('lineHeightValue').textContent = lineHeight;
+    }
+
+    fileInput.addEventListener('change', function () {
+      const file = this.files[0];
+      if (file && (file.name.endsWith('.srt') || file.name.endsWith('.txt'))) {
+        originalFileName = file.name;
+        fileNameDisplay.textContent = file.name;
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          srtContent.value = e.target.result;
+        };
+        reader.readAsText(file);
+      } else {
+        alert('Please upload a .srt or .txt file');
+        fileNameDisplay.textContent = 'None';
+      }
+    });
+
+    function saveFile(format = 'srt') {
+      if (!srtContent.value.trim()) {
+        alert('No content to save! Please add some content first.');
+        return;
+      }
+      
+      const baseFileName = originalFileName ? 
+        originalFileName.replace(/\.[^/.]+$/, "") : 
+        'subtitle';
+      
+      const fileName = `${baseFileName}.${format}`;
+      const content = srtContent.value;
+      
+      const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+      const link = document.createElement("a");
+      link.download = fileName;
+      link.href = URL.createObjectURL(blob);
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
+
+    async function copyToClipboard() {
+      if (!srtContent.value.trim()) {
+        alert('No content to copy!');
+        return;
+      }
+      
+      try {
+        await navigator.clipboard.writeText(srtContent.value);
+        alert('Content copied to clipboard!');
+      } catch (err) {
+        // Fallback for older browsers
+        srtContent.select();
+        document.execCommand('copy');
+        alert('Content copied to clipboard!');
+      }
+    }
+
+    function clearAll() {
+      if (confirm('Are you sure you want to clear all content?')) {
+        srtContent.value = '';
+        fileNameDisplay.textContent = 'None';
+        fileInput.value = '';
+        originalFileName = '';
+      }
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        saveFile('srt');
+      }
+      if (e.ctrlKey && e.key === 'c' && e.shiftKey) {
+        e.preventDefault();
+        copyToClipboard();
+      }
+    });
+  </script>
+
+</body>
+</html>
