@@ -71,12 +71,36 @@
     cursor: move;
     outline: none;
   }
+
+  .footer-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-top: 30px;
+    text-align: center;
+  }
+
+  .btn-coffee {
+    display: inline-block;
+    background: #FFDD88;
+    color: #3b2a1f;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    margin: 10px 0;
+  }
+
+  .btn-coffee:hover {
+    background: #ffd966;
+    transform: scale(1.05);
+  }
 </style>
 </head>
 <body>
 
 <h2>Custom Font Baseline & Height Tester</h2>
-<p>අකුරු වෙනස් කිරීමට <strong>Double Click</strong> කරන්න. එහා මෙහා කිරීමට මවුස් එකෙන් අදින්න.</p>
+<p>Double click text to edit it. Click and drag with mouse to move elements around.</p>
 
 <label><strong>Upload Font:</strong> <input type="file" id="fontUpload" accept=".ttf,.otf"></label>
 <br>
@@ -98,6 +122,12 @@
 
   <img id="clientImg" class="client-img" alt="Client Sample">
   <div id="sampleText" class="sample-text" contenteditable="true" spellcheck="false">Mvigja 2025</div>
+</div>
+
+<div class="footer-section">
+  <p>❤️ Support this project:</p>
+  <a href="https://buymeacoffee.com/hcgraphics" target="_blank" class="btn-coffee">☕ Buy Me a Coffee</a>
+  <p style="margin-top: 15px; font-size: 12px; color: #666;">© 2026 Developed by Chamal H | Contact: harithadharmasiri@gmail.com</p>
 </div>
 
 <script>
@@ -136,18 +166,14 @@ function makeDraggable(element, isImage = false) {
   let startX, startY, initialX, initialY;
 
   element.addEventListener('mousedown', (e) => {
-    // Text එක edit කරන වෙලාවට drag වීම වැළැක්වීමට
     if (document.activeElement === element && !isImage) return;
-
     isDragging = true;
     startX = e.clientX;
     startY = e.clientY;
-    
     const rect = element.getBoundingClientRect();
     const parentRect = element.parentElement.getBoundingClientRect();
     initialX = rect.left - parentRect.left;
     initialY = rect.top - parentRect.top;
-
     if (isImage) e.preventDefault();
   });
 
@@ -155,21 +181,17 @@ function makeDraggable(element, isImage = false) {
     if (!isDragging) return;
     const dx = e.clientX - startX;
     const dy = e.clientY - startY;
-    
     element.style.left = (initialX + dx) + 'px';
     element.style.top = (initialY + dy) + 'px';
     element.style.transform = isImage ? `translate(0,0) scale(${document.getElementById('scaleControl').value})` : 'none';
   });
 
   document.addEventListener('mouseup', () => isDragging = false);
-
-  // Edit කරලා ඉවර වුණාම ආපහු drag කරන්න පුළුවන් වෙන්න focus එක අයින් කරනවා
   element.addEventListener('blur', () => { isDragging = false; });
 }
 
 makeDraggable(clientImg, true);
 makeDraggable(sampleText, false);
-
 </script>
 </body>
 </html>

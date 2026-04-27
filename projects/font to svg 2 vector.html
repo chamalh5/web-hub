@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="si">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Ultimate Vector Font Exporter</title>
@@ -29,13 +29,17 @@
         .btn-save { background: #28a745; color: white; }
         input[type="file"] { display: none; }
         .upload-label { padding: 12px 25px; background: #6f42c1; color: white; border-radius: 8px; cursor: pointer; display: inline-block; }
+
+        .footer-section { background: #f8f9fa; padding: 20px; border-radius: 10px; margin-top: 30px; text-align: center; }
+        .btn-coffee { display: inline-block; background: #FFDD88; color: #3b2a1f; padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 700; margin: 10px 0; }
+        .btn-coffee:hover { background: #ffd966; transform: scale(1.05); }
     </style>
 </head>
 <body>
 
     <div class="control-panel">
         <h1>Vector Font to SVG Exporter</h1>
-        <p>මෙමගින් ෆොන්ට් එකේ ඇති සැබෑ <b>Vector Paths</b> ලබා දෙයි. (No Tracing required)</p>
+        <p>Upload a font file (.ttf/.otf) to extract true vector paths from each character. No tracing required!</p>
         <label class="upload-label" for="fontUpload">Upload Font (.ttf / .otf)</label>
         <input type="file" id="fontUpload" accept=".ttf, .otf" onchange="handleFontUpload(event)">
         <div style="margin-top: 20px;">
@@ -55,6 +59,12 @@
             <button style="background:#6c757d; color:white;" onclick="fullPad.clear()">Clear Edit</button>
             <button style="background:#dc3545; color:white;" onclick="closeOverlay()">Close</button>
         </div>
+    </div>
+
+    <div class="footer-section">
+        <p>❤️ Support development:</p>
+        <a href="https://buymeacoffee.com/hcgraphics" target="_blank" class="btn-coffee">☕ Buy Me a Coffee</a>
+        <p style="margin-top: 15px; font-size: 12px; color: #666;">© 2026 Developed by Chamal H | Contact: harithadharmasiri@gmail.com</p>
     </div>
 
     <script>
@@ -99,7 +109,6 @@
 
         function renderAllChars() {
             chars.forEach(c => {
-                // opentype.js මගින් අකුරේ Path එක ලබා ගැනීම
                 const path = currentFont.getPath(c, 0, 80, 72);
                 const svgPath = path.toSVG(2);
                 const svgFinal = `<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">${svgPath}</svg>`;
@@ -110,11 +119,10 @@
         }
 
         function openEditor(c) {
-            if (!currentFont) return alert("පළමුව ෆොන්ට් එකක් ලබා දෙන්න.");
+            if (!currentFont) return alert("Please upload a font file first.");
             currentLetter = c;
             document.getElementById('overlay').style.display = 'flex';
             
-            // Background Vector Preview
             const path = currentFont.getPath(c, 100, 300, 250);
             document.getElementById('vector-bg').innerHTML = `<svg width="100%" height="100%" viewBox="0 0 800 400">${path.toSVG(2)}</svg>`;
 
@@ -127,7 +135,6 @@
 
         function saveEdit() {
             if (!fullPad.isEmpty()) {
-                // අලුතින් ඇඳි දේ SVG එකක් ලෙස ගබඩා කරයි
                 svgDataMap[currentLetter] = fullPad.toDataURL("image/svg+xml");
                 document.getElementById(`svg-container-${currentLetter}`).innerHTML = `<img src="${svgDataMap[currentLetter]}" width="100%">`;
             }
@@ -141,14 +148,13 @@
             let count = 0;
             for(let c in svgDataMap) {
                 let content = svgDataMap[c];
-                // Base64 දත්ත නම් එය පිරිසිදු කර ගැනීම
                 if(content.startsWith('data:image/svg+xml;base64,')) {
                     content = atob(content.split(',')[1]);
                 }
                 zip.file(`${c}.svg`, content);
                 count++;
             }
-            if(count === 0) return alert("බාගත කිරීමට අකුරු නැත!");
+            if(count === 0) return alert("No characters to download!");
             saveAs(await zip.generateAsync({type:"blob"}), "vector_fonts.zip");
         }
     </script>
