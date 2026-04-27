@@ -280,7 +280,7 @@
       text-align: center;
     }
 
-    /* footer support & contact - using your exact form */
+    /* footer support & contact */
     .footer-support {
       margin-top: 40px;
       background: var(--footer-bg);
@@ -333,7 +333,7 @@
       background: #ffd966;
     }
 
-    /* EXACT form styling as requested */
+    /* Form styling */
     .footer-form {
       display: flex;
       flex-direction: column;
@@ -405,7 +405,7 @@
 <body data-theme="light">
 <div class="app-container">
   
-  <!-- Header: JIBA Creative is a CLICKABLE LINK to your portfolio -->
+  <!-- Header: JIBA Creative is a CLICKABLE LINK to portfolio -->
   <div class="brand-header">
     <div class="branding">
       <a href="https://chamalh5.github.io/JIBAcreative/" target="_blank" class="studio-name-link">JIBA Creative</a>
@@ -469,7 +469,7 @@ abcdefghijklmnopqrstuvwxyz
     <button onclick="copyPreviewText()">📋 Copy Preview Text</button>
   </div>
 
-  <!-- ========== FOOTER: Support My Work + Get in Touch (with your exact form) ========= -->
+  <!-- Footer: Support My Work + Get in Touch -->
   <div class="footer-support">
     <div class="footer-grid">
       <!-- Left Support Coffee Section -->
@@ -483,198 +483,122 @@ abcdefghijklmnopqrstuvwxyz
         </div>
       </div>
 
-      <!-- Right: Get in Touch - YOUR EXACT FORM -->
+      <!-- Right: Get in Touch - Contact Form -->
       <div class="contact-form-area">
         <h3 style="margin:0 0 16px 0;">📬 Get in Touch</h3>
-       <form class="footer-form" id="contactForm" onsubmit="sendToGmail(event)">
-    <input type="text" id="userName" placeholder="Your Name" required>
-    <input type="email" id="userEmail" placeholder="Your Email" required>
-    <textarea id="userMessage" rows="5" placeholder="Your Message or Custom Font Request" required></textarea>
-    <button type="submit" class="submit-btn">SEND MESSAGE</button>
-</form>
+        <form class="footer-form" id="contactForm" onsubmit="sendToGmail(event)">
+          <input type="text" id="userName" placeholder="Your Name" required>
+          <input type="email" id="userEmail" placeholder="Your Email" required>
+          <textarea id="userMessage" rows="5" placeholder="Your Message or Custom Font Request" required></textarea>
+          <button type="submit" class="submit-btn">SEND MESSAGE</button>
+        </form>
         <div style="margin-top: 20px; font-size:0.85rem; background:rgba(0,0,0,0.05); border-radius: 32px; padding: 8px 14px; text-align:center;">
           ✨ Need a custom font? We craft exclusive letterforms.
         </div>
       </div>
     </div>
     <div class="copyright">
-      © 2026 JIBA Creative & HC Graphics Studio. All Rights Reserved.<br>
-      contact - <a href="https://mail.google.com/mail/?view=cm&fs=1&to=harithadharmasiri@gmail.com&su=Service%20Request&body=I%20need%20more%20details%20about%20your%20service." 
-   target="_blank" 
-   style="color:var(--accent-color);">me here</a>
+      © 2026 Developed by Chamal H | Contact: harithadharmasiri@gmail.com
     </div>
   </div>
 </div>
 
 <script>
-  // ---------- FONT CORE (all original functionality preserved) ----------
-  let currentFont = null;
-  let currentFontName = '';
+    let loadedFont = null;
+    let fontFamily = 'CustomFont';
 
-  function setTheme(theme) {
-    document.body.setAttribute('data-theme', theme);
-    document.querySelectorAll('.theme-option').forEach(opt => opt.classList.remove('active'));
-    document.querySelector(`.theme-option[data-theme="${theme}"]`).classList.add('active');
-    try { localStorage.setItem('preferred-theme', theme); } catch(e) {}
-  }
-
-  document.addEventListener('DOMContentLoaded', () => {
-    try { const saved = localStorage.getItem('preferred-theme') || 'light'; setTheme(saved); } catch(e) { setTheme('light'); }
-  });
-
-  document.getElementById('fontInput').addEventListener('change', function(e) {
-    const file = e.target.files[0];
-    if (!file) return;
-    const ext = '.' + file.name.split('.').pop().toLowerCase();
-    if (!['.ttf','.otf','.woff','.woff2'].includes(ext)) {
-      alert('Please upload a valid font (TTF, OTF, WOFF, WOFF2)');
-      return;
+    // Theme management
+    function setTheme(theme) {
+      document.body.setAttribute('data-theme', theme);
+      document.querySelectorAll('.theme-option').forEach(option => option.classList.remove('active'));
+      event.target.classList.add('active');
     }
-    loadFont(file);
-  });
 
-  async function loadFont(file) {
-    try {
-      const arrayBuffer = await file.arrayBuffer();
-      const fontFace = new FontFace('CustomFont', arrayBuffer);
-      await fontFace.load();
-      document.fonts.add(fontFace);
-      currentFont = fontFace;
-      currentFontName = file.name.split('.')[0];
-      updateFontInfo(file, fontFace);
-      document.getElementById('fontInfo').classList.remove('hidden');
-      document.getElementById('previewSection').classList.remove('hidden');
-      document.getElementById('downloadBtn').disabled = false;
+    function setSampleText(type) {
+      const samples = {
+        'pangram': 'The quick brown fox jumps over the lazy dog',
+        'alphabet': 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz',
+        'numbers': '0123456789 !@#$%^&*()',
+        'lorem': 'Lorem ipsum dolor sit amet, consectetur adipiscing elit.',
+        'special': '!@#$%^&*()[]{}+-=~`|\\:;"\'<>,.?/'
+      };
+      document.getElementById('customText').value = samples[type];
       updatePreview();
-    } catch(err) {
-      console.error(err);
-      alert('Error loading font. File might be corrupted or unsupported.');
     }
-  }
 
-  function updateFontInfo(file, fontFace) {
-    document.getElementById('fontName').innerText = fontFace.family || 'Custom Font';
-    document.getElementById('fontFamily').innerText = fontFace.family || 'Custom Typeface';
-    document.getElementById('fileName').innerText = file.name;
-    document.getElementById('fileSize').innerText = formatFileSize(file.size);
-  }
-
-  function formatFileSize(bytes) {
-    if(bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes','KB','MB','GB'];
-    const i = Math.floor(Math.log(bytes)/Math.log(k));
-    return parseFloat((bytes / Math.pow(k,i)).toFixed(2)) + ' ' + sizes[i];
-  }
-
-  function updatePreview() {
-    const previewDiv = document.getElementById('previewDisplay');
-    const customText = document.getElementById('customText').value || 'Upload a font to see the preview here...';
-    previewDiv.innerText = customText;
-    previewDiv.style.fontFamily = currentFont ? 'CustomFont, system-ui, sans-serif' : 'system-ui, sans-serif';
-  }
-
-  function updateFontSize(val) {
-    document.getElementById('fontSizeSlider').value = val;
-    document.getElementById('fontSizeInput').value = val;
-    document.getElementById('previewDisplay').style.fontSize = val + 'px';
-  }
-  
-  function updateLineHeight(val) {
-    document.getElementById('lineHeightSlider').value = val;
-    document.getElementById('lineHeightInput').value = val;
-    document.getElementById('previewDisplay').style.lineHeight = val;
-  }
-
-  function setSampleText(type) {
-    const ta = document.getElementById('customText');
-    const samples = {
-      pangram: 'The quick brown fox jumps over the lazy dog.\nPack my box with five dozen liquor jugs.',
-      alphabet: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ\nabcdefghijklmnopqrstuvwxyz',
-      numbers: '1234567890\n½ ¼ ¾ ⅓ ⅔ ⅕ ⅖ ⅗ ⅘ ⅙ ⅚',
-      lorem: 'Lorem ipsum odor amet, consectetuer adipiscing elit. Augue mus litora fames habitant rhoncus.',
-      special: '!@#$%^&*()_+-=[]{}|;:,.<>?\n"\'`~€£¥¢∞§¶•ªº–≠'
-    };
-    ta.value = samples[type] || samples.pangram;
-    updatePreview();
-  }
-
-  function downloadFontInfo() {
-    if (!currentFont) { alert('No font loaded!'); return; }
-    const content = `Font Information Report
-========================
-File Name: ${document.getElementById('fileName').innerText}
-Font Name: ${document.getElementById('fontName').innerText}
-Font Family: ${document.getElementById('fontFamily').innerText}
-File Size: ${document.getElementById('fileSize').innerText}
-Font Size: ${document.getElementById('fontSizeInput').value}px
-Line Height: ${document.getElementById('lineHeightInput').value}
-Preview Text:
-${document.getElementById('customText').value}
-Generated: ${new Date().toLocaleString()}
---- JIBA Creative & HC Graphics Studio ---`;
-    const blob = new Blob([content], {type: 'text/plain'});
-    const link = document.createElement('a');
-    link.download = `${currentFontName || 'font'}_info.txt`;
-    link.href = URL.createObjectURL(blob);
-    link.click();
-    URL.revokeObjectURL(link.href);
-  }
-
-  function copyPreviewText() {
-    const text = document.getElementById('customText').value;
-    if(!text) { alert('Nothing to copy'); return; }
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = event.target;
-      const original = btn.innerHTML;
-      btn.innerHTML = '✅ Copied!';
-      setTimeout(() => btn.innerHTML = original, 1800);
-    }).catch(() => alert('Copy failed'));
-  }
-
-  document.getElementById('customText').addEventListener('input', updatePreview);
-  
-  document.addEventListener('keydown', (e) => {
-    if(e.ctrlKey && e.key === 's') {
-      e.preventDefault();
-      if(!document.getElementById('downloadBtn').disabled) downloadFontInfo();
+    function updateFontSize(size) {
+      document.getElementById('fontSizeSlider').value = size;
+      document.getElementById('fontSizeInput').value = size;
+      updatePreview();
     }
-  });
 
-  // The form uses native mailto: action - no extra JS needed, it works as standard HTML form
-  // But we add a small visual feedback when form is submitted
-  const contactForm = document.getElementById('contactForm');
-  if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
-      // Native mailto will open email client, we just show a quick notification
-      setTimeout(() => {
-        alert("📧 Thank you! Your email client will open to send your message to harithadharmasiri@gmail.com");
-      }, 10);
+    function updateLineHeight(height) {
+      document.getElementById('lineHeightSlider').value = height;
+      document.getElementById('lineHeightInput').value = height;
+      updatePreview();
+    }
+
+    function updatePreview() {
+      const display = document.getElementById('previewDisplay');
+      display.textContent = document.getElementById('customText').value;
+      display.style.fontSize = document.getElementById('fontSizeSlider').value + 'px';
+      display.style.lineHeight = document.getElementById('lineHeightSlider').value;
+      if (loadedFont) {
+        display.style.fontFamily = fontFamily;
+      }
+    }
+
+    function downloadFontInfo() {
+      if (!loadedFont) return;
+      const info = `Font: ${document.getElementById('fontName').value || 'Unknown'}\nFamily: ${document.getElementById('fontFamily').value || 'Unknown'}\n\nPreview:\n${document.getElementById('customText').value}`;
+      const blob = new Blob([info], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'font-info.txt';
+      a.click();
+    }
+
+    function copyPreviewText() {
+      const text = document.getElementById('customText').value;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('Preview text copied to clipboard!');
+      });
+    }
+
+    // Font loading
+    document.getElementById('fontInput').addEventListener('change', async function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = async function(ev) {
+        try {
+          fontFamily = 'CustomFont_' + Date.now();
+          const fontFace = new FontFace(fontFamily, ev.target.result);
+          await fontFace.load();
+          document.fonts.add(fontFace);
+
+          loadedFont = true;
+          document.getElementById('fontInfo').classList.remove('hidden');
+          document.getElementById('previewSection').classList.remove('hidden');
+          document.getElementById('downloadBtn').disabled = false;
+
+          document.getElementById('fileName').textContent = file.name;
+          document.getElementById('fileSize').textContent = (file.size / 1024).toFixed(2) + ' KB';
+          document.getElementById('fontName').textContent = file.name.replace(/\.[^.]+$/, '');
+          document.getElementById('fontFamily').textContent = fontFamily;
+
+          updatePreview();
+        } catch (err) {
+          alert('Error loading font: ' + err.message);
+        }
+      };
+      reader.readAsArrayBuffer(file);
     });
-  }
 
-  // Initialize preview
-  updatePreview();
-  document.getElementById('previewDisplay').style.fontSize = '24px';
-  document.getElementById('previewDisplay').style.lineHeight = '1.4';
-
-
-function sendToGmail(event) {
-    event.preventDefault(); // Form එක reload වීම වළක්වයි
-
-    const name = document.getElementById('userName').value;
-    const email = document.getElementById('userEmail').value;
-    const message = document.getElementById('userMessage').value;
-
-    const subject = encodeURIComponent("Contact Form: " + name);
-    const body = encodeURIComponent("Name: " + name + "\nEmail: " + email + "\n\nMessage:\n" + message);
-
-    // Gmail Compose ලින්ක් එක සාදයි
-    const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=harithadharmasiri@gmail.com&su=${subject}&body=${body}`;
-
-    // අලුත් ටැබ් එකක විවෘත කරයි
-    window.open(gmailUrl, '_blank');
-}
+    // Initialize preview
+    updatePreview();
 </script>
 </body>
 </html>
