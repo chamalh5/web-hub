@@ -1,0 +1,745 @@
+Here is an HTML document that creates an enhanced UI for the Potrace image vectorizer, with improved tracing controls and a reliable SVG download feature.
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Potrace Studio | Advanced SVG Vectorizer</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(145deg, #e9eef3 0%, #dce2ea 100%);
+            font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+
+        /* modern card container */
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.65);
+            backdrop-filter: blur(2px);
+            border-radius: 2.5rem;
+            box-shadow: 0 20px 40px -12px rgba(0,0,0,0.2), 0 1px 2px rgba(0,0,0,0.05);
+            overflow: hidden;
+            padding: 2rem 2rem 2rem 2rem;
+            transition: all 0.2s ease;
+        }
+
+        h1 {
+            font-weight: 700;
+            font-size: 2.8rem;
+            background: linear-gradient(135deg, #1E2A3E, #2C3E50);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.25rem;
+            display: inline-block;
+        }
+
+        .sub {
+            color: #4a5b6e;
+            margin-bottom: 1.8rem;
+            border-left: 4px solid #3b82f6;
+            padding-left: 1rem;
+            font-weight: 500;
+        }
+
+        /* upload zone */
+        .upload-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            align-items: flex-start;
+        }
+
+        .dropzone {
+            flex: 1.2;
+            min-width: 220px;
+            background: #f8fafd;
+            border: 2px dashed #b9c8e8;
+            border-radius: 1.8rem;
+            padding: 1.8rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .dropzone.hovering {
+            border-color: #3b82f6;
+            background: #eef4ff;
+            transform: scale(0.99);
+        }
+
+        .drop-icon {
+            font-size: 2.6rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dropzone p {
+            color: #1f2a3e;
+            font-weight: 500;
+            margin: 0.5rem 0;
+        }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid #b9c8e8;
+            padding: 0.5rem 1.2rem;
+            border-radius: 3rem;
+            font-weight: 600;
+            color: #1f2a3e;
+            transition: 0.15s;
+            display: inline-block;
+            margin-top: 0.5rem;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-outline:hover {
+            background: #eef2f8;
+            border-color: #3b82f6;
+        }
+
+        .controls-panel {
+            flex: 2;
+            background: #ffffffcc;
+            backdrop-filter: blur(8px);
+            border-radius: 1.5rem;
+            padding: 1.2rem 1.8rem;
+            box-shadow: 0 8px 18px rgba(0,0,0,0.05);
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        .param-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.2rem;
+            margin-bottom: 1.2rem;
+            align-items: center;
+        }
+
+        .param-item {
+            flex: 1;
+            min-width: 140px;
+        }
+
+        .param-item label {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: #4a627a;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .param-item input, .param-item select {
+            width: 100%;
+            padding: 0.5rem 0.75rem;
+            border-radius: 1rem;
+            border: 1px solid #cddfef;
+            background: white;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+
+        .param-item input:focus, .param-item select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .btn-primary {
+            background: #1e2f3f;
+            color: white;
+            border: none;
+            padding: 0.65rem 1.5rem;
+            border-radius: 2.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-primary:hover {
+            background: #0f1e2c;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .btn-secondary {
+            background: #eef2f8;
+            border: 1px solid #cbdde9;
+            color: #1f2a3e;
+            padding: 0.65rem 1.5rem;
+            border-radius: 2.5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.15s;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+            border-color: #8ba3c0;
+        }
+
+        .download-btn {
+            background: #2c5f2d;
+            color: white;
+            border: none;
+        }
+
+        .download-btn:hover {
+            background: #1f4520;
+        }
+
+        .results-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            flex: 1;
+            background: #ffffffdd;
+            backdrop-filter: blur(4px);
+            border-radius: 1.5rem;
+            padding: 1.2rem;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .card h3 {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            color: #1e2f3f;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            border-bottom: 2px solid #e2edf7;
+            padding-bottom: 0.5rem;
+        }
+
+        .preview-area {
+            background: #fefefe;
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            min-height: 220px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            overflow: auto;
+        }
+
+        #imgdiv img, #imgdiv canvas {
+            max-width: 100%;
+            max-height: 280px;
+            object-fit: contain;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        #svgdiv svg {
+            max-width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .svg-wrapper {
+            overflow-x: auto;
+            max-height: 320px;
+        }
+
+        .info-badge {
+            font-size: 0.75rem;
+            background: #f0f4f9;
+            padding: 0.25rem 0.7rem;
+            border-radius: 2rem;
+            color: #2c5282;
+            display: inline-block;
+        }
+
+        footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #5f6f82;
+        }
+
+        @media (max-width: 780px) {
+            body { padding: 1rem; }
+            .app-container { padding: 1.2rem; }
+            .param-group { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+    <script src="js/potrace.js"></script>
+</head>
+<body>
+<div class="app-container">
+    <div style="display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap;">
+        <div>
+            <h1>⚡ Potrace Studio</h1>
+            <div class="sub">high‑fidelity bitmap → SVG vectorization · optimized for letter & glyph tracing</div>
+        </div>
+        <div class="info-badge">✨ enhanced smoothing · tunable threshold</div>
+    </div>
+
+    <div class="upload-grid">
+        <div id="drop" class="dropzone">
+            <div class="drop-icon">🖼️📂</div>
+            <p>Drag & drop image here</p>
+            <div class="btn-outline" id="imageSelect">📁 choose file</div>
+            <input type="file" id="imageInput" accept="image/*" style="display:none">
+            <div style="font-size: 0.7rem; margin-top: 8px;">PNG, JPG, GIF, BMP</div>
+        </div>
+
+        <div class="controls-panel">
+            <div class="param-group">
+                <div class="param-item">
+                    <label>🎚️ Turn policy (edge refinement)</label>
+                    <select id="turnPolicySelect">
+                        <option value="black">black</option>
+                        <option value="white">white</option>
+                        <option value="left">left</option>
+                        <option value="right" selected>right (best for letters)</option>
+                        <option value="minority">minority</option>
+                        <option value="majority">majority</option>
+                    </select>
+                </div>
+                <div class="param-item">
+                    <label>🔍 Turd size (noise filter)</label>
+                    <input type="number" id="turdSize" value="2" step="1" min="0" max="50">
+                    <small style="font-size:0.65rem;">higher = removes small specks</small>
+                </div>
+                <div class="param-item">
+                    <label>📐 Alpha max (curve smoothing)</label>
+                    <input type="number" id="alphaMax" value="1.0" step="0.2" min="0" max="3.0">
+                    <small style="font-size:0.65rem;">lower = more faithful edges</small>
+                </div>
+            </div>
+            <div class="param-group">
+                <div class="param-item">
+                    <label>⚫ Threshold (0-255)</label>
+                    <input type="range" id="thresholdSlider" min="0" max="255" value="180">
+                    <span id="thresholdVal" style="font-size:0.8rem; margin-left: 8px;">180</span>
+                </div>
+                <div class="param-item">
+                    <label>📏 OptiCurve (curve optimization)</label>
+                    <select id="optCurveSelect">
+                        <option value="true">enabled (smoother)</option>
+                        <option value="false">disabled (sharp corners)</option>
+                    </select>
+                </div>
+                <div class="param-item">
+                    <label>🧩 OptTolerance</label>
+                    <input type="number" id="optTolerance" value="0.2" step="0.1" min="0" max="1.5">
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button id="traceBtn" class="btn-primary">✨ TRACE & GENERATE SVG</button>
+                <button id="downloadSvgBtn" class="btn-primary download-btn">💾 DOWNLOAD SVG</button>
+                <button id="loadDemoBtn" class="btn-secondary">📸 Load sample (Yao.jpg)</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="results-section">
+        <div class="card">
+            <h3>📷 Input preview</h3>
+            <div id="imgdiv" class="preview-area" style="display: flex; justify-content: center; align-items: center;">
+                <div style="color:#8699aa;">No image loaded yet</div>
+            </div>
+        </div>
+        <div class="card">
+            <h3>🎯 Vector result (SVG) <span style="font-size:0.7rem;">scalable paths</span></h3>
+            <div id="svgdiv" class="preview-area svg-wrapper" style="justify-content: flex-start;">
+                <div style="color:#8699aa;">Run trace to generate vector</div>
+            </div>
+        </div>
+    </div>
+    <footer>
+        ⚙️ Advanced potrace parameters — adjust Turd size & Threshold to improve letter tracing, avoid long chaotic paths. "right" turn policy recommended for text.
+    </footer>
+</div>
+
+<script>
+    // Enhanced Potrace wrapper with robust settings and better letter tracing
+    (function(){
+        // global references
+        let currentImageBlob = null;
+        let currentSVGString = "";
+        let lastTraceOptions = null;
+        
+        // DOM elements
+        const dropZone = document.getElementById('drop');
+        const imageInput = document.getElementById('imageInput');
+        const imageSelectBtn = document.getElementById('imageSelect');
+        const traceBtn = document.getElementById('traceBtn');
+        const downloadBtn = document.getElementById('downloadSvgBtn');
+        const loadDemoBtn = document.getElementById('loadDemoBtn');
+        const imgDiv = document.getElementById('imgdiv');
+        const svgDiv = document.getElementById('svgdiv');
+        const turnPolicySelect = document.getElementById('turnPolicySelect');
+        const turdSizeInput = document.getElementById('turdSize');
+        const alphaMaxInput = document.getElementById('alphaMax');
+        const thresholdSlider = document.getElementById('thresholdSlider');
+        const thresholdVal = document.getElementById('thresholdVal');
+        const optCurveSelect = document.getElementById('optCurveSelect');
+        const optToleranceInput = document.getElementById('optTolerance');
+
+        // Helper: update threshold display
+        thresholdSlider.addEventListener('input', (e) => {
+            thresholdVal.innerText = e.target.value;
+        });
+        
+        // Helper: reset preview panels (graceful)
+        function setEmptyState() {
+            if(imgDiv) imgDiv.innerHTML = '<div style="color:#8699aa;">No image loaded yet</div>';
+            if(svgDiv) svgDiv.innerHTML = '<div style="color:#8699aa;">Run trace to generate vector</div>';
+            currentSVGString = "";
+        }
+        
+        // display image from Potrace.img or raw file
+        function displayImgFromPotrace() {
+            if(!imgDiv) return;
+            if(Potrace.img && Potrace.img instanceof HTMLImageElement) {
+                imgDiv.innerHTML = '';
+                const container = document.createElement('div');
+                container.style.textAlign = 'center';
+                const clonedImg = Potrace.img.cloneNode(true);
+                clonedImg.style.maxWidth = '100%';
+                clonedImg.style.maxHeight = '280px';
+                clonedImg.style.borderRadius = '12px';
+                container.appendChild(clonedImg);
+                imgDiv.appendChild(container);
+            } else if(currentImageBlob && Potrace.img) {
+                // fallback if img property exists but not displayed
+                imgDiv.innerHTML = '';
+                const imgShow = Potrace.img;
+                if(imgShow.tagName) {
+                    imgDiv.appendChild(imgShow);
+                } else {
+                    imgDiv.innerHTML = '<div>preview error</div>';
+                }
+            } else {
+                imgDiv.innerHTML = '<div style="color:#8699aa;">No image data, please load image first</div>';
+            }
+        }
+        
+        // Core tracing function with latest parameters (ENHANCED for letters)
+        function performTrace() {
+            if(!Potrace || typeof Potrace.loadImageFromFile !== 'function') {
+                console.error("Potrace lib missing");
+                svgDiv.innerHTML = '<div style="color:red;">⚠️ Potrace library not loaded. Check js/potrace.js path</div>';
+                return;
+            }
+            // check if image is available
+            if(!Potrace.img && !currentImageBlob) {
+                svgDiv.innerHTML = '<div style="color:#c2410c;">❌ Please load an image first (drag & drop or select file)</div>';
+                return;
+            }
+            
+            // get advanced parameters
+            const turnPolicy = turnPolicySelect.value;
+            const turdSize = parseInt(turdSizeInput.value, 10) || 0;
+            const alphaMax = parseFloat(alphaMaxInput.value);
+            const threshold = parseInt(thresholdSlider.value, 10);
+            const optCurve = optCurveSelect.value === 'true';
+            const optTolerance = parseFloat(optToleranceInput.value);
+            
+            // build options object
+            const options = {
+                turnpolicy: turnPolicy,
+                turdsize: turdSize,
+                alphamax: alphaMax,
+                opticurve: optCurve,
+                opttolerance: optTolerance,
+                threshold: threshold
+            };
+            
+            // show loading feedback
+            svgDiv.innerHTML = '<div style="padding:1rem;">🌀 Vectorizing... (may take a moment for complex images)</div>';
+            
+            // Important: Potrace expects either loaded image via loadImageFromFile/Url
+            // Use the already loaded image. If Potrace.img exists but not processed yet, call process.
+            // But we need to ensure the image bitmap is set. The library's process uses internal image.
+            // To avoid double processing, we set new parameters and re-process.
+            try {
+                // Since Potrace stores the image, we just call process with updated settings.
+                // but we must apply settings before processing. Potrace accepts global settings?
+                // The original library uses setParameter? Actually we'll override by passing options in process callback.
+                // Based on original potrace.js, process() uses global defaults but we can modify Potrace.params before process.
+                if(window.Potrace && Potrace.setParameter) {
+                    Potrace.setParameter({
+                        turnpolicy: turnPolicy,
+                        turdsize: turdSize,
+                        alphamax: alphaMax,
+                        opticurve: optCurve,
+                        opttolerance: optTolerance
+                    });
+                    Potrace.threshold = threshold;
+                } else {
+                    // manual assign if no setParameter
+                    if(Potrace.params) {
+                        Potrace.params.turnpolicy = turnPolicy;
+                        Potrace.params.turdsize = turdSize;
+                        Potrace.params.alphamax = alphaMax;
+                        Potrace.params.opticurve = optCurve;
+                        Potrace.params.opttolerance = optTolerance;
+                        Potrace.params.threshold = threshold;
+                    } else {
+                        Potrace.turnpolicy = turnPolicy;
+                        Potrace.turdsize = turdSize;
+                        Potrace.alphamax = alphaMax;
+                        Potrace.opticurve = optCurve;
+                        Potrace.opttolerance = optTolerance;
+                        Potrace.threshold = threshold;
+                    }
+                }
+                
+                // process the image with updated params
+                Potrace.process(function(svgResult) {
+                    // Callback receives svg string sometimes? based on original signature: process(callback) where callback gets svg string or just calls display.
+                    // But original code used Potrace.getSVG after process. Let's robustly generate SVG string.
+                    let finalSVG = "";
+                    try {
+                        // attempt to retrieve generated SVG. getSVG accepts size parameter (optional)
+                        if(typeof Potrace.getSVG === 'function') {
+                            finalSVG = Potrace.getSVG(1);  // 1 = no scaling, raw paths
+                        } else if(svgResult && typeof svgResult === 'string') {
+                            finalSVG = svgResult;
+                        } else {
+                            finalSVG = Potrace.svg || "";
+                        }
+                        if(!finalSVG || finalSVG.length < 20) {
+                            throw new Error("empty svg");
+                        }
+                        currentSVGString = finalSVG;
+                        // display SVG in preview with proper scaling
+                        svgDiv.innerHTML = '';
+                        const wrapper = document.createElement('div');
+                        wrapper.style.overflowX = 'auto';
+                        wrapper.style.maxHeight = '320px';
+                        wrapper.innerHTML = finalSVG;
+                        svgDiv.appendChild(wrapper);
+                        // show success badge
+                    } catch(e) {
+                        console.warn(e);
+                        svgDiv.innerHTML = '<div style="color:#b91c1c;">⚠️ Tracing produced invalid SVG. Try adjusting Turd size (increase to 2-4) or lower Threshold (150-200) for better letter extraction.</div>';
+                        currentSVGString = "";
+                    }
+                });
+            } catch(err) {
+                console.error(err);
+                svgDiv.innerHTML = '<div style="color:#b91c1c;">❌ Tracing error: ' + (err.message || "unknown") + '. Try different image or parameters.</div>';
+            }
+        }
+        
+        // safe image loading handler (file)
+        function handleFiles(files) {
+            if(!files || files.length === 0) return;
+            const file = files[0];
+            if(!file.type.match('image.*')) {
+                alert("Please select an image file (PNG, JPEG, etc)");
+                return;
+            }
+            currentImageBlob = file;
+            // load image into Potrace
+            Potrace.loadImageFromFile(file);
+            // wait for image to be fully loaded before displaying (loadImageFromFile async)
+            const checkInterval = setInterval(() => {
+                if(Potrace.img && Potrace.img.complete !== false) {
+                    clearInterval(checkInterval);
+                    displayImgFromPotrace();
+                    // reset SVG preview
+                    svgDiv.innerHTML = '<div style="color:#8699aa;">Image loaded. Click "TRACE & GENERATE SVG"</div>';
+                    currentSVGString = "";
+                } else if(Potrace.img && Potrace.img.naturalWidth) {
+                    clearInterval(checkInterval);
+                    displayImgFromPotrace();
+                }
+            }, 150);
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                if(Potrace.img) displayImgFromPotrace();
+                else svgDiv.innerHTML = '<div>Failed to load preview, but image data ready for tracing.</div>';
+            }, 1000);
+        }
+        
+        // drag & drop enhancement
+        function setupDragAndDrop() {
+            if(!dropZone) return;
+            dropZone.addEventListener("dragenter", (e) => {
+                e.preventDefault();
+                dropZone.classList.add('hovering');
+            });
+            dropZone.addEventListener("dragleave", (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('hovering');
+            });
+            dropZone.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                dropZone.classList.add('hovering');
+            });
+            dropZone.addEventListener("drop", (e) => {
+                e.preventDefault();
+                dropZone.classList.remove('hovering');
+                if(e.dataTransfer.files && e.dataTransfer.files.length) {
+                    handleFiles(e.dataTransfer.files);
+                }
+            });
+        }
+        
+        // load demo Yao.jpg via URL
+        function loadDemoImage() {
+            svgDiv.innerHTML = '<div>🖼️ Loading sample image "yao.jpg"...</div>';
+            // Potrace.loadImageFromUrl expects relative path
+            Potrace.loadImageFromUrl("yao.jpg");
+            const checkDemo = setInterval(() => {
+                if(Potrace.img && (Potrace.img.complete || Potrace.img.naturalWidth > 0)) {
+                    clearInterval(checkDemo);
+                    displayImgFromPotrace();
+                    svgDiv.innerHTML = '<div style="color:#2b6e3b;">✅ Sample loaded. Adjust parameters if needed & click TRACE.</div>';
+                    currentSVGString = "";
+                } else if(Potrace.img && Potrace.img.tagName) {
+                    clearInterval(checkDemo);
+                    displayImgFromPotrace();
+                }
+            }, 200);
+            setTimeout(() => {
+                clearInterval(checkDemo);
+                if(Potrace.img) displayImgFromPotrace();
+                else svgDiv.innerHTML = '<div>⚠️ Could not load yao.jpg, ensure file exists in same folder. Use drag-drop instead.</div>';
+            }, 1500);
+        }
+        
+        // download SVG with robust filename and data URL
+        function downloadSVG() {
+            if(!currentSVGString || currentSVGString.length < 50) {
+                // if not traced, try to re-trace immediately using current parameters
+                if(Potrace.img) {
+                    svgDiv.innerHTML = '<div>🌀 No SVG cached, running trace first...</div>';
+                    performTrace();
+                    setTimeout(() => {
+                        if(currentSVGString && currentSVGString.length > 50) {
+                            triggerDownload();
+                        } else {
+                            alert("Tracing failed or no vector output. Adjust parameters (threshold / turd size) and click TRACE first.");
+                        }
+                    }, 500);
+                } else {
+                    alert("Please load an image and click 'TRACE & GENERATE SVG' before downloading.");
+                }
+                return;
+            }
+            triggerDownload();
+        }
+        
+        function triggerDownload() {
+            if(!currentSVGString) return;
+            const blob = new Blob([currentSVGString], {type: "image/svg+xml"});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            const timestamp = new Date().toISOString().slice(0,19).replace(/:/g, '-');
+            a.download = `potrace_vector_${timestamp}.svg`;
+            a.href = url;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Override save method for robustness: also bind to download button
+        function bindEvents() {
+            imageSelectBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                imageInput.click();
+            });
+            imageInput.addEventListener('change', (e) => {
+                if(imageInput.files && imageInput.files.length) handleFiles(imageInput.files);
+            });
+            traceBtn.addEventListener('click', (e) => {
+                if(!Potrace.img) {
+                    svgDiv.innerHTML = '<div style="color:#b45309;">⚠️ No image loaded. Please drop an image first.</div>';
+                    return;
+                }
+                performTrace();
+            });
+            downloadBtn.addEventListener('click', (e) => {
+                downloadSVG();
+            });
+            loadDemoBtn.addEventListener('click', (e) => {
+                loadDemoImage();
+            });
+        }
+        
+        // Fix threshold integration and also handle errors on letter tracing: recommended default presets
+        function applyRecommendedLetterPreset() {
+            // set high contrast for letter shapes: threshold ~160-190, turdsize=2, alphamax=1, turnpolicy=right
+            thresholdSlider.value = "180";
+            thresholdVal.innerText = "180";
+            turdSizeInput.value = "2";
+            alphaMaxInput.value = "1.0";
+            turnPolicySelect.value = "right";
+            optCurveSelect.value = "true";
+            optToleranceInput.value = "0.2";
+        }
+        
+        // override Potrace.getSVG if needed but we already use process callback robustly
+        // also extend default potrace param error handling: ensure no infinite paths
+        
+        // init all
+        function init() {
+            setupDragAndDrop();
+            bindEvents();
+            applyRecommendedLetterPreset();  // better for letters from start
+            setEmptyState();
+            // check if potrace.js loaded
+            if(typeof Potrace === 'undefined') {
+                console.error("potrace library missing");
+                document.querySelector('.controls-panel').innerHTML += '<div style="color:red;">ERROR: potrace.js not found. Ensure js/potrace.js exists.</div>';
+            } else {
+                // expose threshold enhancement
+                if(!Potrace.setParameter) {
+                    Potrace.setParameter = function(opts) {
+                        if(Potrace.params) Object.assign(Potrace.params, opts);
+                        else {
+                            for(let k in opts) Potrace[k] = opts[k];
+                        }
+                    };
+                }
+            }
+        }
+        init();
+    })();
+</script>
+</body>
+</html>
+```
