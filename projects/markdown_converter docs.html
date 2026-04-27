@@ -103,82 +103,6 @@
             margin-bottom: 20px;
         }
         
-        .markdown-part {
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            background: white;
-        }
-        
-        .part-header {
-            background: #f8f9fa;
-            padding: 12px 15px;
-            border-bottom: 1px solid #e0e0e0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .part-title {
-            font-weight: 600;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .part-order {
-            background: #667eea;
-            color: white;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        .part-controls {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .part-btn {
-            padding: 4px 8px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        
-        .btn-up { background: #28a745; color: white; }
-        .btn-down { background: #ffc107; color: black; }
-        .btn-remove { background: #dc3545; color: white; }
-        
-        .part-content {
-            padding: 15px;
-        }
-        
-        .part-textarea {
-            width: 100%;
-            min-height: 120px;
-            border: 1px solid #e0e0e0;
-            border-radius: 6px;
-            padding: 10px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            resize: vertical;
-        }
-        
-        .part-textarea:focus {
-            outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
-        }
-        
         .controls {
             display: flex;
             gap: 15px;
@@ -211,23 +135,9 @@
             color: white;
         }
         
-        .btn-success {
-            background: linear-gradient(135deg, #4facfe, #00f2fe);
-            color: white;
-        }
-        
-        .btn-add {
-            background: linear-gradient(135deg, #56ab2f, #a8e6cf);
-            color: white;
-        }
-        
         .btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
         }
         
         #preview {
@@ -242,91 +152,41 @@
             line-height: 1.6;
         }
         
-        #preview h1, #preview h2, #preview h3 {
-            color: #2c3e50;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-        
-        #preview h1 { font-size: 2em; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-        #preview h2 { font-size: 1.5em; }
-        #preview h3 { font-size: 1.2em; }
-        
-        #preview p {
-            margin-bottom: 15px;
-        }
-        
-        #preview code {
-            background: #f4f4f4;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-family: 'Courier New', monospace;
-        }
-        
-        #preview pre {
-            background: #f4f4f4;
-            padding: 15px;
-            border-radius: 8px;
-            overflow-x: auto;
-            margin: 15px 0;
-        }
-        
-        #preview blockquote {
-            border-left: 4px solid #667eea;
-            padding-left: 20px;
-            margin: 15px 0;
-            color: #666;
-            font-style: italic;
-        }
-        
-        .part-separator {
-            border-top: 3px solid #eee;
-            margin: 30px 0;
-            padding-top: 20px;
-            position: relative;
-        }
-        
-        .part-separator::before {
-            content: "Part " counter(part-counter);
-            counter-increment: part-counter;
-            position: absolute;
-            top: -10px;
-            left: 20px;
-            background: white;
-            padding: 0 10px;
-            color: #666;
-            font-size: 12px;
-            font-weight: bold;
-        }
-        
-        #preview {
-            counter-reset: part-counter;
-        }
-        
-        .status {
-            padding: 10px;
-            border-radius: 6px;
-            font-weight: 500;
-            display: none;
-        }
-        
-        .status.success {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        
-        .status.error {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        
         .empty-state {
             text-align: center;
             color: #666;
             padding: 40px;
             font-style: italic;
+        }
+
+        .footer-support {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .btn-coffee {
+            display: inline-block;
+            background: #FFDD88;
+            color: #3b2a1f;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+
+        .btn-coffee:hover {
+            background: #ffd966;
+            transform: scale(1.05);
+        }
+
+        .copyright {
+            margin-top: 15px;
+            font-size: 12px;
+            color: #666;
         }
         
         @media (max-width: 768px) {
@@ -338,24 +198,6 @@
                 border-right: none;
                 border-bottom: 2px solid #f0f0f0;
             }
-            
-            .controls {
-                justify-content: center;
-            }
-            
-            .btn {
-                flex: 1;
-                min-width: 120px;
-            }
-        }
-        
-        .icon {
-            width: 16px;
-            height: 16px;
-        }
-
-        #fileInput {
-            display: none;
         }
     </style>
 </head>
@@ -363,7 +205,7 @@
     <div class="container">
         <div class="header">
             <h1>Multi-Part Markdown Converter</h1>
-            <p>Combine multiple Markdown files or sections into professional DOCX and PDF documents</p>
+            <p>Combine multiple Markdown files into professional documents</p>
         </div>
         
         <div class="main-content">
@@ -377,30 +219,15 @@
                     <p style="font-size: 12px; color: #666; margin-top: 8px;">Multiple files will be combined in order</p>
                 </div>
                 
-                <input type="file" id="fileInput" multiple accept=".md,.txt" />
+                <input type="file" id="fileInput" multiple accept=".md,.txt" style="display:none;" />
                 
                 <div class="controls">
-                    <button class="btn btn-add" onclick="addNewPart()">
-                        <span>➕</span> Add Part
-                    </button>
                     <button class="btn btn-primary" onclick="convertToDocx()">
                         <span>📄</span> Convert to DOCX
                     </button>
                     <button class="btn btn-secondary" onclick="convertToPdf()">
                         <span>📋</span> Convert to PDF
                     </button>
-                    <button class="btn btn-success" onclick="updatePreview()">
-                        <span>👁️</span> Update Preview
-                    </button>
-                </div>
-                
-                <div id="status" class="status"></div>
-                
-                <div class="parts-container" id="partsContainer">
-                    <div class="empty-state">
-                        No document parts added yet.<br>
-                        Upload files or click "Add Part" to start.
-                    </div>
                 </div>
             </div>
             
@@ -413,448 +240,39 @@
                 </div>
             </div>
         </div>
+
+        <div class="footer-support">
+            <h3 style="color: #667eea; margin-bottom: 10px;">❤️ Support Development</h3>
+            <p style="margin-bottom: 10px;">Love this tool? Support with a coffee!</p>
+            <a href="https://buymeacoffee.com/hcgraphics" target="_blank" class="btn-coffee">☕ Buy Me a Coffee</a>
+            <div class="copyright">© 2026 Developed by Chamal H | Contact: harithadharmasiri@gmail.com</div>
+        </div>
     </div>
 
     <script>
-        let documentParts = [];
-        let partCounter = 0;
+        function convertToDocx() {
+            alert('DOCX conversion feature coming soon!');
+        }
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            setupFileUpload();
+        function convertToPdf() {
+            alert('PDF conversion feature coming soon!');
+        }
+
+        document.getElementById('uploadArea').addEventListener('dragover', (e) => {
+            e.preventDefault();
+            document.getElementById('uploadArea').classList.add('dragover');
         });
 
-        function setupFileUpload() {
-            const uploadArea = document.getElementById('uploadArea');
-            const fileInput = document.getElementById('fileInput');
+        document.getElementById('uploadArea').addEventListener('dragleave', () => {
+            document.getElementById('uploadArea').classList.remove('dragover');
+        });
 
-            // Drag and drop handlers
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
-
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('dragover');
-            });
-
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                const files = Array.from(e.dataTransfer.files).filter(file => 
-                    file.name.endsWith('.md') || file.name.endsWith('.txt')
-                );
-                handleFiles(files);
-            });
-
-            fileInput.addEventListener('change', (e) => {
-                handleFiles(Array.from(e.target.files));
-            });
-        }
-
-        async function handleFiles(files) {
-            if (files.length === 0) return;
-
-            showStatus(`Loading ${files.length} file(s)...`, 'success');
-
-            for (const file of files) {
-                try {
-                    const content = await readFileContent(file);
-                    addPart(file.name, content);
-                } catch (error) {
-                    showStatus(`Error reading ${file.name}: ${error.message}`, 'error');
-                }
-            }
-
-            updatePreview();
-            showStatus(`Successfully loaded ${files.length} file(s)`, 'success');
-        }
-
-        function readFileContent(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (e) => resolve(e.target.result);
-                reader.onerror = () => reject(new Error('Failed to read file'));
-                reader.readAsText(file);
-            });
-        }
-
-        function addPart(title = '', content = '') {
-            partCounter++;
-            const part = {
-                id: partCounter,
-                title: title || `Part ${partCounter}`,
-                content: content || `# New Section\n\nAdd your markdown content here...`
-            };
-            
-            documentParts.push(part);
-            renderParts();
-            
-            if (documentParts.length === 1) {
-                updatePreview();
-            }
-        }
-
-        function addNewPart() {
-            addPart();
-        }
-
-        function renderParts() {
-            const container = document.getElementById('partsContainer');
-            
-            if (documentParts.length === 0) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        No document parts added yet.<br>
-                        Upload files or click "Add Part" to start.
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = documentParts.map((part, index) => `
-                <div class="markdown-part" data-id="${part.id}">
-                    <div class="part-header">
-                        <div class="part-title">
-                            <div class="part-order">${index + 1}</div>
-                            <input type="text" value="${part.title}" 
-                                   onchange="updatePartTitle(${part.id}, this.value)"
-                                   style="border: none; background: transparent; font-weight: 600; color: #2c3e50; width: 200px;">
-                        </div>
-                        <div class="part-controls">
-                            ${index > 0 ? `<button class="part-btn btn-up" onclick="movePart(${part.id}, 'up')">↑</button>` : ''}
-                            ${index < documentParts.length - 1 ? `<button class="part-btn btn-down" onclick="movePart(${part.id}, 'down')">↓</button>` : ''}
-                            <button class="part-btn btn-remove" onclick="removePart(${part.id})">×</button>
-                        </div>
-                    </div>
-                    <div class="part-content">
-                        <textarea class="part-textarea" 
-                                  oninput="updatePartContent(${part.id}, this.value)"
-                                  placeholder="Enter markdown content...">${part.content}</textarea>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function updatePartTitle(id, title) {
-            const part = documentParts.find(p => p.id === id);
-            if (part) {
-                part.title = title;
-                updatePreview();
-            }
-        }
-
-        function updatePartContent(id, content) {
-            const part = documentParts.find(p => p.id === id);
-            if (part) {
-                part.content = content;
-                debounce(updatePreview, 500)();
-            }
-        }
-
-        function movePart(id, direction) {
-            const index = documentParts.findIndex(p => p.id === id);
-            if (index === -1) return;
-
-            const newIndex = direction === 'up' ? index - 1 : index + 1;
-            if (newIndex < 0 || newIndex >= documentParts.length) return;
-
-            [documentParts[index], documentParts[newIndex]] = [documentParts[newIndex], documentParts[index]];
-            renderParts();
-            updatePreview();
-        }
-
-        function removePart(id) {
-            documentParts = documentParts.filter(p => p.id !== id);
-            renderParts();
-            updatePreview();
-        }
-
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        function updatePreview() {
-            const preview = document.getElementById('preview');
-            
-            if (documentParts.length === 0) {
-                preview.innerHTML = `
-                    <div class="empty-state">
-                        Combined document preview will appear here
-                    </div>
-                `;
-                return;
-            }
-
-            const combinedContent = documentParts.map((part, index) => {
-                const htmlContent = marked.parse(part.content);
-                return index === 0 ? htmlContent : `<div class="part-separator"></div>${htmlContent}`;
-            }).join('');
-
-            preview.innerHTML = combinedContent;
-        }
-
-        function showStatus(message, type = 'success') {
-            const statusDiv = document.getElementById('status');
-            statusDiv.textContent = message;
-            statusDiv.className = `status ${type}`;
-            statusDiv.style.display = 'block';
-            
-            setTimeout(() => {
-                statusDiv.style.display = 'none';
-            }, 3000);
-        }
-
-        function getCombinedMarkdown() {
-            return documentParts.map(part => part.content).join('\n\n---\n\n');
-        }
-
-        function getCombinedHTML() {
-            return documentParts.map((part, index) => {
-                const htmlContent = marked.parse(part.content);
-                return index === 0 ? htmlContent : `<div style="page-break-before: always; border-top: 2px solid #eee; margin-top: 40px; padding-top: 20px;"></div>${htmlContent}`;
-            }).join('');
-        }
-
-        async function convertToDocx() {
-            if (documentParts.length === 0) {
-                showStatus('Please add some content first', 'error');
-                return;
-            }
-
-            try {
-                const combinedHTML = getCombinedHTML();
-                
-                const docxContent = `
-                    <html>
-                        <head>
-                            <meta charset="utf-8">
-                            <title>Combined Document</title>
-                            <style>
-                                body { 
-                                    font-family: 'Times New Roman', serif; 
-                                    line-height: 1.6; 
-                                    margin: 40px; 
-                                    color: #333;
-                                }
-                                h1 { 
-                                    color: #2c3e50; 
-                                    font-size: 28px; 
-                                    margin: 30px 0 20px 0;
-                                    border-bottom: 2px solid #eee;
-                                    padding-bottom: 10px;
-                                }
-                                h2 { 
-                                    color: #34495e; 
-                                    font-size: 22px; 
-                                    margin: 25px 0 15px 0;
-                                }
-                                h3 { 
-                                    color: #34495e; 
-                                    font-size: 18px; 
-                                    margin: 20px 0 12px 0;
-                                }
-                                p { 
-                                    margin-bottom: 16px; 
-                                    text-align: justify;
-                                }
-                                blockquote { 
-                                    border-left: 4px solid #ccc; 
-                                    padding-left: 20px; 
-                                    margin: 20px 0; 
-                                    color: #666; 
-                                    font-style: italic;
-                                }
-                                code { 
-                                    background: #f8f8f8; 
-                                    padding: 2px 6px; 
-                                    border-radius: 3px; 
-                                    font-family: 'Courier New', monospace;
-                                }
-                                pre { 
-                                    background: #f8f8f8; 
-                                    padding: 15px; 
-                                    border-radius: 6px; 
-                                    overflow-x: auto; 
-                                    margin: 20px 0;
-                                    border: 1px solid #ddd;
-                                }
-                                ul, ol { 
-                                    margin-bottom: 16px; 
-                                    padding-left: 30px; 
-                                }
-                                li { 
-                                    margin-bottom: 6px; 
-                                }
-                                table {
-                                    border-collapse: collapse;
-                                    width: 100%;
-                                    margin: 20px 0;
-                                }
-                                th, td {
-                                    border: 1px solid #ddd;
-                                    padding: 12px;
-                                    text-align: left;
-                                }
-                                th {
-                                    background-color: #f2f2f2;
-                                    font-weight: bold;
-                                }
-                            </style>
-                        </head>
-                        <body>${combinedHTML}</body>
-                    </html>
-                `;
-                
-                const blob = new Blob([docxContent], { 
-                    type: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' 
-                });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `combined-document-${new Date().toISOString().split('T')[0]}.html`;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                
-                showStatus(`Document with ${documentParts.length} parts converted and downloaded!`, 'success');
-            } catch (error) {
-                showStatus('Error converting to DOCX: ' + error.message, 'error');
-            }
-        }
-
-        async function convertToPdf() {
-            if (documentParts.length === 0) {
-                showStatus('Please add some content first', 'error');
-                return;
-            }
-
-            try {
-                showStatus('Generating PDF... This may take a moment', 'success');
-
-                const combinedHTML = getCombinedHTML();
-                
-                const tempDiv = document.createElement('div');
-                tempDiv.innerHTML = combinedHTML;
-                tempDiv.style.cssText = `
-                    font-family: 'Times New Roman', serif;
-                    line-height: 1.6;
-                    padding: 40px;
-                    background: white;
-                    max-width: 800px;
-                    margin: 0 auto;
-                    color: #333;
-                `;
-                
-                // Enhanced styling for PDF
-                const headings = tempDiv.querySelectorAll('h1, h2, h3, h4, h5, h6');
-                headings.forEach((heading, index) => {
-                    heading.style.color = '#2c3e50';
-                    heading.style.marginTop = '30px';
-                    heading.style.marginBottom = '15px';
-                    if (heading.tagName === 'H1') {
-                        heading.style.fontSize = '28px';
-                        heading.style.borderBottom = '2px solid #eee';
-                        heading.style.paddingBottom = '10px';
-                    }
-                });
-                
-                const paragraphs = tempDiv.querySelectorAll('p');
-                paragraphs.forEach(p => {
-                    p.style.marginBottom = '16px';
-                    p.style.textAlign = 'justify';
-                });
-                
-                const blockquotes = tempDiv.querySelectorAll('blockquote');
-                blockquotes.forEach(bq => {
-                    bq.style.borderLeft = '4px solid #ccc';
-                    bq.style.paddingLeft = '20px';
-                    bq.style.color = '#666';
-                    bq.style.fontStyle = 'italic';
-                    bq.style.margin = '20px 0';
-                });
-                
-                const codes = tempDiv.querySelectorAll('code');
-                codes.forEach(code => {
-                    if (code.parentElement.tagName.toLowerCase() !== 'pre') {
-                        code.style.background = '#f8f8f8';
-                        code.style.padding = '2px 6px';
-                        code.style.borderRadius = '3px';
-                    }
-                });
-                
-                const pres = tempDiv.querySelectorAll('pre');
-                pres.forEach(pre => {
-                    pre.style.background = '#f8f8f8';
-                    pre.style.padding = '15px';
-                    pre.style.borderRadius = '6px';
-                    pre.style.border = '1px solid #ddd';
-                    pre.style.overflow = 'auto';
-                    pre.style.margin = '20px 0';
-                });
-
-                const lists = tempDiv.querySelectorAll('ul, ol');
-                lists.forEach(list => {
-                    list.style.paddingLeft = '30px';
-                    list.style.marginBottom = '16px';
-                });
-
-                const listItems = tempDiv.querySelectorAll('li');
-                listItems.forEach(li => {
-                    li.style.marginBottom = '6px';
-                });
-                
-                document.body.appendChild(tempDiv);
-                
-                const canvas = await html2canvas(tempDiv, {
-                    scale: 2,
-                    useCORS: true,
-                    allowTaint: true,
-                    backgroundColor: '#ffffff'
-                });
-                
-                document.body.removeChild(tempDiv);
-                
-                const imgData = canvas.toDataURL('image/png');
-                const { jsPDF } = window.jspdf;
-                const pdf = new jsPDF({
-                    orientation: 'portrait',
-                    unit: 'mm',
-                    format: 'a4'
-                });
-                
-                const imgWidth = 210;
-                const pageHeight = 295;
-                const imgHeight = (canvas.height * imgWidth) / canvas.width;
-                let heightLeft = imgHeight;
-                let position = 0;
-                
-                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                heightLeft -= pageHeight;
-                
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
-                    pdf.addPage();
-                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-                    heightLeft -= pageHeight;
-                }
-                
-                pdf.save(`combined-document-${new Date().toISOString().split('T')[0]}.pdf`);
-                showStatus(`PDF with ${documentParts.length} parts generated successfully!`, 'success');
-                
-            } catch (error) {
-                showStatus('Error converting to PDF: ' + error.message, 'error');
-            }
-        }
+        document.getElementById('uploadArea').addEventListener('drop', (e) => {
+            e.preventDefault();
+            document.getElementById('uploadArea').classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            alert('Files received: ' + files.length);
+        });
     </script>
 </body>
 </html>
