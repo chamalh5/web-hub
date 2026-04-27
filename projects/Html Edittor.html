@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Advanced HTML Editor</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0f172a;
+            color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Header */
+        .header {
+            background-color: #1e293b;
+            padding: 10px;
+            border-bottom: 2px solid #334155;
+            flex-shrink: 0;
+        }
+
+        .header h1 {
+            font-size: 1.1rem;
+            text-align: center;
+            margin-bottom: 8px;
+            color: #3b82f6;
+        }
+
+        .header-buttons {
+            display: flex;
+            gap: 5px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        button, .btn-label {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .btn-upload { background-color: #3b82f6; color: white; }
+        .btn-clear { background-color: #ef4444; color: white; }
+        .btn-preview { background-color: #a855f7; color: white; }
+        .btn-paste { background-color: #10b981; color: white; }
+
+        /* Find & Replace Bar */
+        .tools-bar {
+            background-color: #1e293b;
+            padding: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .tools-bar input {
+            padding: 6px;
+            border-radius: 4px;
+            border: 1px solid #475569;
+            background-color: #0f172a;
+            color: white;
+            font-size: 12px;
+            min-width: 150px;
+        }
+
+        .btn-tool {
+            background-color: #475569;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Main Editor Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .editor-container {
+            display: flex;
+            flex: 1;
+            background-color: #0f172a;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Line Numbers */
+        .line-numbers {
+            width: 45px;
+            padding: 12px 5px;
+            text-align: right;
+            background-color: #1e293b;
+            color: #64748b;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            user-select: none;
+            border-right: 1px solid #334155;
+            overflow: hidden;
+        }
+
+        #htmlCode {
+            flex: 1;
+            padding: 12px;
+            background-color: transparent;
+            color: #4ade80;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            border: none;
+            resize: none;
+            outline: none;
+            line-height: 20px;
+            white-space: pre;
+            overflow: auto;
+        }
+
+        .preview-section {
+            flex: 1;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #preview {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #1e293b;
+            padding: 10px;
+            border-top: 2px solid #334155;
+        }
+
+        .footer input {
+            width: 200px;
+            padding: 8px;
+            background-color: #0f172a;
+            border: 1px solid #475569;
+            color: white;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+
+        .btn-download {
+            background-color: #22c55e;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>HTML Editor Pro</h1>
+        <div class="header-buttons">
+            <label for="fileInput" class="btn-label btn-upload">Upload</label>
+            <input type="file" id="fileInput" class="hidden" accept=".html,.htm,.txt">
+            <button class="btn-clear" onclick="clearCode()">Clear</button>
+            <button class="btn-preview" onclick="togglePreview()" id="previewBtn">Preview</button>
+            <button class="btn-paste" onclick="pasteFromClipboard()">Paste</button>
+        </div>
+    </div>
+
+    <div class="tools-bar" id="toolsBar">
+        <input type="text" id="searchInput" placeholder="Find text...">
+        <input type="text" id="replaceInput" placeholder="Replace with...">
+        <button class="btn-tool" onclick="findNext()">Find Next</button>
+        <button class="btn-tool" onclick="replaceNext()">Replace</button>
+        <button class="btn-tool" onclick="replaceAll()">Replace All</button>
+    </div>
+
+    <div class="main-content">
+        <div class="editor-container" id="editorContainer">
+            <div class="line-numbers" id="lineNumbers">1</div>
+            <textarea id="htmlCode" placeholder="Start coding..." oninput="syncEditor()" onscroll="syncScroll()"></textarea>
+        </div>
+
+        <div class="preview-section hidden" id="previewSection">
+            <iframe id="preview"></iframe>
+        </div>
+    </div>
+
+    <div class="footer">
+        <input type="text" id="fileName" value="index.html">
+        <button class="btn-download" onclick="downloadFile()">Download File</button>
+    </div>
+
+    <script>
+        const codeArea = document.getElementById('htmlCode');
+        const lineNumbers = document.getElementById('lineNumbers');
+        const previewFrame = document.getElementById('preview');
+        let lastSearchPos = 0;
+
+        // Line Number Logic
+        function syncEditor() {
+            const lines = codeArea.value.split('\n').length;
+            let lineContent = '';
+            for (let i = 1; i <= lines; i++) {
+                lineContent += i + '<br>';
+            }
+            lineNumbers.innerHTML = lineContent;
+            updatePreview();
+        }
+
+        function syncScroll() {
+            lineNumbers.scrollTop = codeArea.scrollTop;
+        }
+
+        // Toggle Preview
+        function togglePreview() {
+            const editor = document.getElementById('editorContainer');
+            const preview = document.getElementById('previewSection');
+            const tools = document.getElementById('toolsBar');
+            const btn = document.getElementById('previewBtn');
+
+            if (preview.classList.contains('hidden')) {
+                preview.classList.remove('hidden');
+                editor.classList.add('hidden');
+                tools.classList.add('hidden');
+                btn.textContent = 'Edit Code';
+                updatePreview();
+            } else {
+                preview.classList.add('hidden');
+                editor.classList.remove('hidden');
+                tools.classList.remove('hidden');
+                btn.textContent = 'Preview';
+            }
+        }
+
+        function updatePreview() {
+            previewFrame.srcdoc = codeArea.value;
+        }
+
+        // Find & Replace Logic with Auto-Scroll
+        function findNext() {
+            const searchTerm = document.getElementById('searchInput').value;
+            if (!searchTerm) return;
+
+            const content = codeArea.value;
+            let index = content.toLowerCase().indexOf(searchTerm.toLowerCase(), lastSearchPos);
+
+            if (index === -1) {
+                index = content.toLowerCase().indexOf(searchTerm.toLowerCase(), 0);
+            }
+
+            if (index !== -1) {
+                codeArea.focus();
+                codeArea.setSelectionRange(index, index + searchTerm.length);
+                
+                // Scroll calculation
+                const lineHeight = 20; 
+                const linesBefore = content.substring(0, index).split('\n').length;
+                codeArea.scrollTop = (linesBefore - 5) * lineHeight; 
+                
+                lastSearchPos = index + searchTerm.length;
+            } else {
+                alert("Not found");
+                lastSearchPos = 0;
+            }
+        }
+
+        function replaceNext() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const replaceTerm = document.getElementById('replaceInput').value;
+            const content = codeArea.value;
+            
+            const start = codeArea.selectionStart;
+            const end = codeArea.selectionEnd;
+            const selectedText = content.substring(start, end);
+
+            if (selectedText.toLowerCase() === searchTerm.toLowerCase()) {
+                codeArea.setRangeText(replaceTerm, start, end, 'select');
+                syncEditor();
+            } else {
+                findNext();
+            }
+        }
+
+        function replaceAll() {
+            const searchTerm = document.getElementById('searchInput').value;
+            const replaceTerm = document.getElementById('replaceInput').value;
+            if (!searchTerm) return;
+
+            const newContent = codeArea.value.split(searchTerm).join(replaceTerm);
+            codeArea.value = newContent;
+            syncEditor();
+        }
+
+        // File Operations
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    codeArea.value = ev.target.result;
+                    document.getElementById('fileName').value = file.name;
+                    syncEditor();
+                };
+                reader.readAsText(file);
+            }
+        });
+
+        async function pasteFromClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                const start = codeArea.selectionStart;
+                const end = codeArea.selectionEnd;
+                codeArea.setRangeText(text, start, end, 'end');
+                syncEditor();
+            } catch (err) {
+                alert('Allow clipboard access to paste.');
+            }
+        }
+
+        function downloadFile() {
+            const blob = new Blob([codeArea.value], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = document.getElementById('fileName').value;
+            a.click();
+        }
+
+        function clearCode() {
+            if (confirm('Clear everything?')) {
+                codeArea.value = '';
+                syncEditor();
+            }
+        }
+
+        // Initial setup
+        syncEditor();
+    </script>
+</body>
+</html>
